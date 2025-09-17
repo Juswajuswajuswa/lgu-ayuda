@@ -18,3 +18,14 @@ export const signUp = async (req, res, next) => {
     console.log(error);
   }
 };
+
+export const getUsers = async (req, res, next) => {
+  try {
+    const allUsers = await User.find();
+    if (!allUsers) return res.json({ message: "no users yet", allUsers: [] });
+
+    console.log(allUsers);
+
+    res.status(200).json({ users: allUsers });
+  } catch (error) {}
+};

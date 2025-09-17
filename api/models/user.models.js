@@ -1,23 +1,31 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import validator from "validator";
 
-const UserModelSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
+const UserModelSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+    },
+    lastName: {
+      type: String,
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      validate: [validator.isEmail, "Please provide a valid email"],
+    },
+
+    password: {
+      type: String,
+      requred: [true, "Password is required"],
+      // select: false, // wont sent in a request by default
+    },
   },
-  lastName: {
-    type: String,
-  },
-  username: {
-    type: String,
-    required: [true, "Password is required"],
-    unique: true,
-  },
-  password: {
-    type: String,
-    requred: [true, "Password is required"],
-  },
-});
+  { timestamps: true }
+);
 
 UserModelSchema.pre("save", async function (next) {
   if (!this.isDirectModified("password")) next();
