@@ -1,7 +1,7 @@
 import React from "react";
 
 function TestPage() {
-  return <div className="">TestPage</div>;
+  return <div className="bg-black">TestPage</div>;
 }
 
 export default TestPage;
