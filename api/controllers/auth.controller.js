@@ -26,6 +26,8 @@ export const signUp = async (req, res, next) => {
   }
 };
 
+export const createAdmin = async (req, res, next) => {};
+
 export const getUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find();
