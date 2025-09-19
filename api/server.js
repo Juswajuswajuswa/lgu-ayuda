@@ -6,6 +6,7 @@ import { connectDb } from "./lib/db.js";
 
 // routes
 import authRoutes from "../api/routes/auth.route.js";
+import { handleError } from "./middleware/handleError.js";
 
 // to load env
 config();
@@ -17,6 +18,8 @@ app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(handleError);
 
 app.use(`/api/auth`, authRoutes);
 

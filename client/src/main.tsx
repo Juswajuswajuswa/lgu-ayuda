@@ -5,8 +5,8 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import RootLayout from "./layouts/RootLayout";
-import TestPage from "./pages/TestPage";
+import RootLayout from "./layouts/root-layout";
+import TestPage from "./pages/test-page";
 
 const queryClient = new QueryClient();
 

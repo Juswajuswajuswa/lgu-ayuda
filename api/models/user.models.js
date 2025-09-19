@@ -4,12 +4,9 @@ import validator from "validator";
 
 const UserModelSchema = new mongoose.Schema(
   {
-    firstName: {
-      type: String,
-    },
-    lastName: {
-      type: String,
-    },
+    firstName: { type: String, trim: true, required: true },
+    lastName: { type: String, trim: true, required: true },
+    phoneNumber: { type: Number, required: true },
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -20,7 +17,10 @@ const UserModelSchema = new mongoose.Schema(
     password: {
       type: String,
       requred: [true, "Password is required"],
-      // select: false, // wont sent in a request by default
+    },
+    role: {
+      type: String,
+      enum: ["admin", "validator", "encoder"], // what more???
     },
   },
   { timestamps: true }

@@ -1,17 +1,24 @@
 import User from "../models/user.models.js";
+import { handleMakeError } from "../middleware/handleError.js";
 
 export const signUp = async (req, res, next) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
+    const existingEmail = await User.findOne({ email: email });
+
+    if (existingEmail)
+      return handleMakeError(400, "An account with this email already exists");
+
     const newUser = new User({
-      username,
+      email,
       password,
     });
 
     await newUser.save();
 
     res.status(200).json({
+      success: true,
       newUser,
     });
   } catch (error) {
@@ -26,6 +33,6 @@ export const getUsers = async (req, res, next) => {
 
     console.log(allUsers);
 
-    res.status(200).json({ users: allUsers });
+    res.status(200).json({ success: true, users: allUsers });
   } catch (error) {}
 };
