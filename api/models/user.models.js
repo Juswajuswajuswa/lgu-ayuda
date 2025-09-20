@@ -6,7 +6,7 @@ const UserModelSchema = new mongoose.Schema(
   {
     firstName: { type: String, trim: true, required: true },
     lastName: { type: String, trim: true, required: true },
-    phoneNumber: { type: Number, required: true },
+    phoneNumber: { type: String, required: true },
     email: {
       type: String,
       required: [true, "Email is required"],

@@ -6,6 +6,7 @@ import { connectDb } from "./lib/db.js";
 
 // routes
 import authRoutes from "../api/routes/auth.route.js";
+import userRoutes from "../api/routes/user.route.js";
 import { handleError } from "./middleware/handleError.js";
 
 // to load env
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use(handleError);
 
 app.use(`/api/auth`, authRoutes);
+app.use(`/api/user`, userRoutes);
 
 connectDb()
   .then(() => {
