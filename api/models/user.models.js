@@ -22,6 +22,11 @@ const UserModelSchema = new mongoose.Schema(
       type: String,
       enum: ["admin", "validator", "encoder"], // what more???
     },
+
+    barangay: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Barangay",
+    },
   },
   { timestamps: true }
 );

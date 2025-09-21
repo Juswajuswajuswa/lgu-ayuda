@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const BaranggayModelSchema = new mongoose.Schema(
+const BarangayModelSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     municipality: { type: String, required: true },
@@ -14,8 +14,8 @@ const BaranggayModelSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps }
+  { timestamps: true }
 );
 
-const Baranggay = mongoose.model("Baranggay", BaranggayModelSchema);
+const Baranggay = mongoose.model("Barangay", BarangayModelSchema);
 export default Baranggay;

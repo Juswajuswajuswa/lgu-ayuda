@@ -4,6 +4,7 @@ import { generateTokens } from "../utils/generateToken.js";
 import { setCookies } from "../utils/setCookies.js";
 import crypto from "crypto";
 import { sendEmail } from "../nodemailer/nodemailer.js";
+import { requiredInputs } from "../utils/requiredInputs.js";
 
 function generateOTP() {
   return crypto.randomInt(100000, 999999).toString();
@@ -88,9 +89,7 @@ export const sendAdminEmailOTP = async (req, res, next) => {
 
 export const registerAdmin = async (req, res, next) => {
   const { email, otp } = req.body;
-
-  if (!email || !otp)
-    return next(handleMakeError(400, "Email and OTP are required"));
+  requiredInputs(["email", "otp"], req.body, next);
 
   try {
     const stored = otpStore.get(email);
@@ -141,9 +140,7 @@ export const registerAdmin = async (req, res, next) => {
 
 export const signin = async (req, res, next) => {
   const { email, password } = req.body;
-
-  if (!email || !password)
-    return next(handleMakeError(400, "Email and password are required"));
+  requiredInputs(["email", "password"], req.body, next);
 
   try {
     const user = await User.findOne({ email });
@@ -184,7 +181,23 @@ export const createStaff = async (req, res, next) => {
     confirmPassword,
     phoneNumber,
     role,
+    barangay,
   } = req.body;
+
+  requiredInputs(
+    [
+      "firstName",
+      "email",
+      "lastName",
+      "password",
+      "confirmPassword",
+      "phoneNumber",
+      "role",
+      "barangay",
+    ],
+    req.body,
+    next
+  );
 
   if (password.trim() != confirmPassword.trim())
     return next(
@@ -203,6 +216,7 @@ export const createStaff = async (req, res, next) => {
       password,
       phoneNumber,
       role,
+      barangay,
     });
 
     const savedStaff = await newStaff.save();
