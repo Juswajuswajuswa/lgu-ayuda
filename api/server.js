@@ -9,6 +9,7 @@ import authRoutes from "../api/routes/auth.route.js";
 import userRoutes from "../api/routes/user.route.js";
 import { handleError } from "./middleware/handleError.js";
 import { sendEmail } from "./nodemailer/nodemailer.js";
+import User from "./models/user.models.js";
 
 // to load env
 config();

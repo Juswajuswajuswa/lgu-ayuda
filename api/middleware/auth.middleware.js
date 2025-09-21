@@ -4,7 +4,7 @@ import { handleMakeError } from "./handleError.js";
 
 export const requireAuth = async (req, res, next) => {
   const accessToken =
-    req.cookes.accessToken || req.headers.authorization?.split(" ")[1];
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
   if (!accessToken)
     return next(handleMakeError(401, "You are not authorized."));

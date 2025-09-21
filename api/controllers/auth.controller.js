@@ -176,8 +176,15 @@ export const signin = async (req, res, next) => {
 
 export const createStaff = async (req, res, next) => {
   const userId = req.user.id;
-  const { firstName, lastName, password, confirmPassword, phoneNumber, role } =
-    req.body;
+  const {
+    firstName,
+    email,
+    lastName,
+    password,
+    confirmPassword,
+    phoneNumber,
+    role,
+  } = req.body;
 
   if (password.trim() != confirmPassword.trim())
     return next(
@@ -192,16 +199,17 @@ export const createStaff = async (req, res, next) => {
     const newStaff = new User({
       firstName,
       lastName,
+      email,
       password,
       phoneNumber,
       role,
     });
 
-    const savedStaff = newStaff.save();
+    const savedStaff = await newStaff.save();
     res.status(200).json({
       success: true,
       message: "Succesfully created a staff",
-      staff: savedStaff,
+      data: savedStaff,
     });
   } catch (error) {
     next(error);
