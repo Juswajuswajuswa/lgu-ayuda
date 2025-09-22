@@ -120,7 +120,7 @@ export const registerAdmin = async (req, res, next) => {
     const adminObject = savedAdmin.toObject();
     delete adminObject.password;
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: "Admin created sucessfully!",
       data: {
