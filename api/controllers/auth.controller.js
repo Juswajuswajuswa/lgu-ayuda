@@ -1,10 +1,12 @@
 import User from "../models/user.models.js";
-import { handleMakeError } from "../middleware/handleError.js";
 import { generateTokens } from "../utils/generateToken.js";
 import { setCookies } from "../utils/setCookies.js";
 import crypto from "crypto";
 import { sendEmail } from "../nodemailer/nodemailer.js";
 import { requiredInputs } from "../utils/requiredInputs.js";
+import Barangay from "../models/barangay.model.js";
+import { AppError } from "../utils/appError.js";
+import mongoose from "mongoose";
 
 function generateOTP() {
   return crypto.randomInt(100000, 999999).toString();
@@ -26,14 +28,12 @@ function cleanupExpiredOTPs() {
 export const sendAdminEmailOTP = async (req, res, next) => {
   const { email } = req.body;
 
-  if (!email) return next(handleMakeError(400, "Email is required."));
+  if (!email) throw new AppError(400, "Email is required.");
 
   try {
     const existingEmail = await User.exists({ email });
     if (existingEmail)
-      return next(
-        handleMakeError(400, "This email is already exist. try new one.")
-      );
+      throw new AppError(400, "This email is already exist. try new one.");
 
     cleanupExpiredOTPs();
     // rate limiting to prevent spam request
@@ -48,11 +48,9 @@ export const sendAdminEmailOTP = async (req, res, next) => {
           (cooldownMs - timeSinceLastAttempt) / (1000 * 60)
         );
 
-        return next(
-          handleMakeError(
-            429,
-            `Please wait ${timeLeftMinutes} minutes before requesting another.`
-          )
+        throw new AppError(
+          429,
+          `Please wait ${timeLeftMinutes} minutes before requesting another.`
         );
       }
     }
@@ -94,14 +92,13 @@ export const registerAdmin = async (req, res, next) => {
   try {
     const stored = otpStore.get(email);
 
-    if (!stored) return next(handleMakeError(400, "OTP not found or expired"));
-
+    if (!stored) throw new AppError(400, "OTP not found or expired");
     if (stored.expires < Date.now()) {
       otpStore.delete(email);
-      return next(handleMakeError(400, "OTP expired"));
+      throw new AppError(400, "OTP expired");
     }
 
-    if (stored.otp !== otp) return next(handleMakeError(400, "Invalid OTP"));
+    if (stored.otp !== otp) throw new AppError(400, "Invalid OTP");
 
     const createAdmin = new User({
       email,
@@ -148,7 +145,7 @@ export const signin = async (req, res, next) => {
     const isPasswordValid = user ? user.comparePassword(password) : false;
 
     if (!user || !isPasswordValid)
-      return next(handleMakeError(400, "Invalid email or password"));
+      throw new AppError(400, "Invalid email or password");
 
     const { accessToken } = generateTokens(user._id);
     setCookies(res, accessToken);
@@ -172,7 +169,9 @@ export const signin = async (req, res, next) => {
 };
 
 export const createStaff = async (req, res, next) => {
+  const session = await mongoose.startSession();
   const userId = req.user.id;
+
   const {
     firstName,
     email,
@@ -200,15 +199,14 @@ export const createStaff = async (req, res, next) => {
   );
 
   if (password.trim() != confirmPassword.trim())
-    return next(
-      handleMakeError(400, "Passwords does not match. Please try again.")
-    );
+    throw new AppError(400, "Passwords does not match. Please try again.");
 
   const validRoles = ["encoder", "validator"];
-  if (!validRoles.includes(role))
-    return next(handleMakeError(400, "Invalid role"));
+  if (!validRoles.includes(role)) throw new AppError(400, "Invalid role");
 
   try {
+    session.startTransaction();
+
     const newStaff = new User({
       firstName,
       lastName,
@@ -219,13 +217,65 @@ export const createStaff = async (req, res, next) => {
       barangay,
     });
 
-    const savedStaff = await newStaff.save();
-    res.status(200).json({
+    const savedStaff = await newStaff.save({ session: session });
+
+    await Barangay.findByIdAndUpdate(
+      barangay,
+      {
+        $push: {
+          staffs: newStaff._id,
+        },
+      },
+      { new: true, runValidators: true, session: session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({
       success: true,
       message: "Succesfully created a staff",
       data: savedStaff,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
+  }
+};
+
+export const deleteStaff = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  const { staffId } = req.params;
+
+  if (!staffId) throw new AppError(400, "Staff ID does not exist");
+
+  try {
+    session.startTransaction();
+
+    const user = await User.findOne({ _id: staffId }).session(session);
+    if (!user) throw new AppError(400, "No user found");
+
+    if (!user.role || user.role === "")
+      throw new AppError(403, "Cannot delete a normal user");
+
+    const deletedUser = await User.findByIdAndDelete(staffId).session(session);
+    await Barangay.findByIdAndUpdate(deletedUser.barangay, {
+      $pull: { staffs: staffId },
+    }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      success: true,
+      message: "Staff successfully deleted!",
+      data: deletedUser,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+    console.log(error);
   }
 };

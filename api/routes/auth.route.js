@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createStaff,
+  deleteStaff,
   registerAdmin,
   sendAdminEmailOTP,
   signin,
@@ -14,5 +15,11 @@ router.post(`/register-admin`, sendAdminEmailOTP);
 router.post(`/create-admin`, registerAdmin);
 router.post(`/create-staff`, requireAuth, requireRole("admin"), createStaff);
 router.post(`/signin`, signin);
+router.delete(
+  `/delete-staff/:staffId`,
+  requireAuth,
+  requireRole("admin"),
+  deleteStaff
+);
 
 export default router;

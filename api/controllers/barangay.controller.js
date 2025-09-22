@@ -25,7 +25,13 @@ export const addBarangay = async (req, res, next) => {
 
 export const getBarangays = async (req, res, next) => {
   try {
-    const barangays = await Baranggay.find();
+    const barangays = await Baranggay.find()
+      .populate({
+        path: "staffs",
+        select: "firstName lastName email phoneNumber role createdAt",
+        options: { sort: { createdAt: -1 } },
+      })
+      .sort({ createdAt: -1 });
     if (!barangays && barangays.length === 0) {
       return res
         .status(200)

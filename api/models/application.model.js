@@ -18,6 +18,7 @@ const ApplicationModelSchema = new mongoose.Schema(
       enum: ["pending", "verified", "approved", "rejected"],
       default: "pending",
     },
+    notes: String,
   },
   { timestamps: true }
 );

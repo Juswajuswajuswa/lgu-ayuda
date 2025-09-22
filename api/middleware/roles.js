@@ -1,17 +1,15 @@
-import { handleMakeError } from "./handleError.js";
+import { AppError } from "../utils/appError.js";
 
 export const requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return next(handleMakeError(401, "Not authenticated"));
+      throw new AppError(400, "Not authenticated");
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return next(
-        handleMakeError(
-          403,
-          `Access denied: requires [${allowedRoles.join(", ")}]`
-        )
+      throw new AppError(
+        403,
+        `Access denied: requires [${allowedRoles.join(", ")}]`
       );
     }
     next();

@@ -7,7 +7,7 @@ const BarangayModelSchema = new mongoose.Schema(
     province: { type: String, required: true },
     // captainsName: String,
     // contactNumber: String,
-    staff: [
+    staffs: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -17,5 +17,5 @@ const BarangayModelSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Baranggay = mongoose.model("Barangay", BarangayModelSchema);
-export default Baranggay;
+const Barangay = mongoose.model("Barangay", BarangayModelSchema);
+export default Barangay;

@@ -1,9 +1,9 @@
-import { handleMakeError } from "../middleware/handleError.js";
+import { AppError } from "./appError.js";
 
 export const requiredInputs = (requiredFields, data, next) => {
   for (const field of requiredFields) {
     if (!data[field]) {
-      return next(handleMakeError(400, `${field} is required`));
+      throw new AppError(400, `${field} is required`);
     }
   }
 };
