@@ -279,3 +279,111 @@ export const deleteStaff = async (req, res, next) => {
     console.log(error);
   }
 };
+
+export const updateStaff = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  const { staffId } = req.params;
+  const {
+    firstName,
+    email,
+    lastName,
+    password,
+    confirmPassword,
+    phoneNumber,
+    role,
+    barangay,
+  } = req.body;
+
+  requiredInputs(
+    [
+      "firstName",
+      "email",
+      "lastName",
+      "password",
+      "confirmPassword",
+      "phoneNumber",
+      "role",
+      "barangay",
+    ],
+    req.body,
+    next
+  );
+
+  const validRoles = ["encoder", "validator"];
+  if (!validRoles.includes(role)) throw new AppError(400, "Invalid role");
+
+  try {
+    session.startTransaction();
+
+    const staff = await User.findById(staffId);
+    if (!staff) throw new AppError(400, "Staff not found");
+
+    let isPasswordChanged = false;
+
+    if (password) {
+      if (password.trim() != confirmPassword.trim())
+        throw new AppError(400, "Passwords does not match. Please try again.");
+
+      if (await staff.comparePassword(password)) {
+        throw new AppError(400, "Cannot use previous password");
+      } else {
+        isPasswordChanged = true;
+      }
+    }
+
+    const updatedData = {
+      firstName,
+      email,
+      lastName,
+      password,
+      confirmPassword,
+      phoneNumber,
+      role,
+      barangay,
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(
+      staffId,
+      {
+        $set: updatedData,
+      },
+      { new: true, runValidators: true }
+    ).session(session);
+
+    if (barangay && staff.barangay) {
+      if (barangay.toString() !== staff.barangay.toString()) {
+        await Barangay.findByIdAndUpdate(
+          staff.barangay,
+          {
+            $pull: {
+              staffs: staffId,
+            },
+          },
+          { new: true, runValidators: true }
+        ).session(session);
+      }
+
+      await Barangay.findByIdAndUpdate(
+        updatedUser.barangay,
+        {
+          $addToSet: {
+            staffs: staffId,
+          },
+        },
+        { new: true, runValidators: true }
+      ).session(session);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+    res.status(200).json({
+      success: true,
+      message: "Succesfully updated staff",
+      data: updatedUser,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+  }
+};

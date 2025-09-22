@@ -5,6 +5,7 @@ import {
   registerAdmin,
   sendAdminEmailOTP,
   signin,
+  updateStaff,
 } from "../controllers/auth.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/roles.js";
@@ -20,6 +21,12 @@ router.delete(
   requireAuth,
   requireRole("admin"),
   deleteStaff
+);
+router.put(
+  `/update-staff/:staffId`,
+  requireAuth,
+  requireRole("admin"),
+  updateStaff
 );
 
 export default router;
