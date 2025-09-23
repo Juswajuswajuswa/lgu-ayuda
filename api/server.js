@@ -3,11 +3,13 @@ import { config } from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDb } from "./lib/db.js";
+import bodyParser from "body-parser";
 
 // routes
 import authRoutes from "../api/routes/auth.route.js";
 import userRoutes from "../api/routes/user.route.js";
 import barangayRoutes from "../api/routes/barangay.route.js";
+import beneficiaryRoutes from "../api/routes/beneficiary.route.js";
 //
 import { handleError } from "./middleware/handleError.js";
 
@@ -21,12 +23,14 @@ app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(handleError);
 
 app.use(`/api/auth`, authRoutes);
 app.use(`/api/user`, userRoutes);
 app.use(`/api/barangay`, barangayRoutes);
+app.use(`/api/beneficiary`, beneficiaryRoutes);
 
 connectDb()
   .then(() => {

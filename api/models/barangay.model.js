@@ -7,6 +7,12 @@ const BarangayModelSchema = new mongoose.Schema(
     province: { type: String, required: true },
     // captainsName: String,
     // contactNumber: String,
+    beneficiaries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Beneficiary",
+      },
+    ],
     staffs: [
       {
         type: mongoose.Schema.Types.ObjectId,

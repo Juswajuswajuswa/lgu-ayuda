@@ -4,6 +4,7 @@ import { requiredInputs } from "../utils/requiredInputs.js";
 import { AppError } from "../utils/appError.js";
 import User from "../models/user.models.js";
 import Barangay from "../models/barangay.model.js";
+import Beneficiary from "../models/beneficiary.model.js";
 
 export const addBarangay = async (req, res, next) => {
   const { name, municipality, province } = req.body;
@@ -67,7 +68,15 @@ export const deleteBarangay = async (req, res, next) => {
         barangay: deletedBarangay.staffs,
       },
       { $unset: { barangay: null } },
-      { new: true, runValidators: true }
+      { new: true }
+    ).session(session);
+
+    await Beneficiary.updateMany(
+      {
+        "address.barangay": deletedBarangay._id,
+      },
+      { $set: { "address.barangay": null } },
+      { new: true }
     ).session(session);
 
     await session.commitTransaction();

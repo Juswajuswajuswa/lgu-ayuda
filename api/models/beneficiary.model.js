@@ -11,12 +11,16 @@ const BeneficiaryModelSchema = new mongoose.Schema(
     gender: { type: String, enum: ["male", "female", "other"] },
     phoneNumber: { type: String, required: true },
     address: {
-      street: String,
-      barangay: String,
-      city: String,
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      barangay: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Barangay",
+        required: true,
+      },
     },
     // houseHoldSize: {}, ??
-    income: { type: String, enum: ["low", "middle", "high"], default: "low" },
+    // income: { type: String, enum: ["low", "middle", "high"], default: "low" },
     status: {
       type: String,
       enum: ["registered", "approved", "rejected"],
@@ -27,7 +31,10 @@ const BeneficiaryModelSchema = new mongoose.Schema(
       type: String,
     },
 
-    barangay: { type: mongoose.Schema.Types.ObjectId, ref: "Barangay" },
+    isScanned: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
