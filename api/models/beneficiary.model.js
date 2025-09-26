@@ -27,14 +27,25 @@ const BeneficiaryModelSchema = new mongoose.Schema(
       default: "registered",
     },
 
-    qrCode: {
+    validId: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
+
+    claimCode: {
       type: String,
     },
 
-    isScanned: {
-      type: Boolean,
-      default: false,
-    },
+    // qrCode: {D
+    //   type: String,
+    // },
+
+    // isScanned: {
+    //   type: Boolean,
+    //   default: false,
+    // },
   },
   { timestamps: true }
 );

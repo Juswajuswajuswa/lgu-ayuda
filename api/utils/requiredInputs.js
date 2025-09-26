@@ -7,3 +7,4 @@ export const requiredInputs = (requiredFields, data, next) => {
     }
   }
 };
+

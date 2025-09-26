@@ -2,9 +2,9 @@ import express from "express";
 import {
   getBeneficiaries,
   registerBeneficiary,
-  scanBeneficiaryId,
+  //   scanBeneficiaryId,
   updateBeneficiary,
-  verifyBeneficiaryId,
+  //   verifyBeneficiaryId,
 } from "../controllers/beneficiary.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/roles.js";
@@ -18,9 +18,9 @@ router.post(
   registerBeneficiary
 );
 
-router.get(`/:beneficiaryId/scan`, scanBeneficiaryId);
+// router.get(`/:beneficiaryId/scan`, scanBeneficiaryId);
 router.get(`/get-beneficiaries`, requireAuth, getBeneficiaries);
-router.post(`/:beneficiaryId/scan`, verifyBeneficiaryId);
+// router.post(`/:beneficiaryId/scan`, verifyBeneficiaryId);
 router.put(
   `/update-beneficiary/:beneficiaryId`,
   requireAuth,

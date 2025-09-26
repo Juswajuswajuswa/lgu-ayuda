@@ -17,7 +17,7 @@ export const getSingleUser = async (req, res, next) => {
 export const getUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find().sort({ createdAt: -1 });
-    if (!allUsers) return res.json({ message: "no users yet", allUsers: [] });
+    if (!allUsers) return res.json({ message: "Empty user", allUsers: [] });
 
     console.log(allUsers);
 
@@ -34,8 +34,7 @@ export const getStaffs = async (req, res, next) => {
     })
       .populate({ path: "barangay", select: "name municipality province" })
       .sort({ createdAt: -1 });
-    if (!allStaffs)
-      return res.json({ message: "no staffs yet", allStaffs: [] });
+    if (!allStaffs) return res.json({ message: "Empty staffs", allStaffs: [] });
 
     res.status(200).json({ success: true, users: allStaffs });
   } catch (error) {

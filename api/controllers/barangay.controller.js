@@ -38,9 +38,7 @@ export const getBarangays = async (req, res, next) => {
       })
       .sort({ createdAt: -1 });
     if (!barangays && barangays.length === 0) {
-      return res
-        .status(200)
-        .json({ message: "No barangay found", barangays: [] });
+      return res.json({ message: "Empty barangay", barangays: [] });
     }
 
     console.log(barangays);
@@ -84,7 +82,7 @@ export const deleteBarangay = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Successfully deleted a barangay",
-      data: deletedBarangay,
+      deleted: deletedBarangay,
     });
   } catch (error) {
     await session.abortTransaction();

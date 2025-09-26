@@ -7,9 +7,9 @@ const ApplicationModelSchema = new mongoose.Schema(
       ref: "Beneficiary",
       required: true,
     },
-    program: {
+    ayuda: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Program",
+      ref: "Ayuda",
       required: true,
     },
     submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

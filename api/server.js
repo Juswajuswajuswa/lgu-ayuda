@@ -10,6 +10,7 @@ import authRoutes from "../api/routes/auth.route.js";
 import userRoutes from "../api/routes/user.route.js";
 import barangayRoutes from "../api/routes/barangay.route.js";
 import beneficiaryRoutes from "../api/routes/beneficiary.route.js";
+import ayudaRoutes from "../api/routes/ayuda.route.js";
 //
 import { handleError } from "./middleware/handleError.js";
 
@@ -31,6 +32,7 @@ app.use(`/api/auth`, authRoutes);
 app.use(`/api/user`, userRoutes);
 app.use(`/api/barangay`, barangayRoutes);
 app.use(`/api/beneficiary`, beneficiaryRoutes);
+app.use(`/api/ayuda`, ayudaRoutes);
 
 connectDb()
   .then(() => {

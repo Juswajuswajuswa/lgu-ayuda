@@ -7,6 +7,7 @@ import { requiredInputs } from "../utils/requiredInputs.js";
 import Barangay from "../models/barangay.model.js";
 import { AppError } from "../utils/appError.js";
 import mongoose from "mongoose";
+import { validateTypes } from "../utils/validateType.js";
 
 function generateOTP() {
   return crypto.randomInt(100000, 999999).toString();
@@ -198,11 +199,10 @@ export const createStaff = async (req, res, next) => {
     next
   );
 
+  validateTypes(["encoder", "validator"], role);
+
   if (password.trim() != confirmPassword.trim())
     throw new AppError(400, "Passwords does not match. Please try again.");
-
-  const validRoles = ["encoder", "validator"];
-  if (!validRoles.includes(role)) throw new AppError(400, "Invalid role");
 
   try {
     session.startTransaction();
@@ -270,7 +270,7 @@ export const deleteStaff = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Staff successfully deleted!",
-      data: deletedUser,
+      deleted: deletedUser,
     });
   } catch (error) {
     await session.abortTransaction();
