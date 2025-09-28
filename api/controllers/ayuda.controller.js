@@ -3,6 +3,8 @@ import { AppError } from "../utils/appError.js";
 import { requiredInputs } from "../utils/requiredInputs.js";
 import { validateTypes } from "../utils/validateType.js";
 
+const VALID_AYUDA_TYPES = ["cash", "goods"];
+
 export const registerAyuda = async (req, res, next) => {
   const { name, description, amount, type, budget } = req.body;
 
@@ -12,7 +14,7 @@ export const registerAyuda = async (req, res, next) => {
   }
 
   requiredInputs(["name", "description", "type", "budget"], req.body);
-  validateTypes(["cash", "goods"], type);
+  validateTypes(VALID_AYUDA_TYPES, type);
 
   try {
     const ayuda = new Ayuda({

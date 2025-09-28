@@ -9,6 +9,8 @@ import { AppError } from "../utils/appError.js";
 import mongoose from "mongoose";
 import { validateTypes } from "../utils/validateType.js";
 
+const VALID_STAFF_ROLE = ["encoder", "validator"];
+
 function generateOTP() {
   return crypto.randomInt(100000, 999999).toString();
 }
@@ -171,6 +173,7 @@ export const signin = async (req, res, next) => {
 
 export const createStaff = async (req, res, next) => {
   const session = await mongoose.startSession();
+  session.startTransaction();
   const userId = req.user.id;
 
   const {
@@ -184,28 +187,26 @@ export const createStaff = async (req, res, next) => {
     barangay,
   } = req.body;
 
-  requiredInputs(
-    [
-      "firstName",
-      "email",
-      "lastName",
-      "password",
-      "confirmPassword",
-      "phoneNumber",
-      "role",
-      "barangay",
-    ],
-    req.body,
-    next
-  );
-
-  validateTypes(["encoder", "validator"], role);
-
-  if (password.trim() != confirmPassword.trim())
-    throw new AppError(400, "Passwords does not match. Please try again.");
-
   try {
-    session.startTransaction();
+    requiredInputs(
+      [
+        "firstName",
+        "email",
+        "lastName",
+        "password",
+        "confirmPassword",
+        "phoneNumber",
+        "role",
+        "barangay",
+      ],
+      req.body,
+      next
+    );
+
+    validateTypes(VALID_STAFF_ROLE, role);
+
+    if (password.trim() != confirmPassword.trim())
+      throw new AppError(400, "Passwords does not match. Please try again.");
 
     const newStaff = new User({
       firstName,
@@ -230,8 +231,6 @@ export const createStaff = async (req, res, next) => {
     );
 
     await session.commitTransaction();
-    session.endSession();
-
     res.status(201).json({
       success: true,
       message: "Succesfully created a staff",
@@ -239,8 +238,9 @@ export const createStaff = async (req, res, next) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    session.endSession();
     next(error);
+  } finally {
+    session.endSession();
   }
 };
 
@@ -294,25 +294,24 @@ export const updateStaff = async (req, res, next) => {
     barangay,
   } = req.body;
 
-  requiredInputs(
-    [
-      "firstName",
-      "email",
-      "lastName",
-      "password",
-      "confirmPassword",
-      "phoneNumber",
-      "role",
-      "barangay",
-    ],
-    req.body,
-    next
-  );
-
-  const validRoles = ["encoder", "validator"];
-  if (!validRoles.includes(role)) throw new AppError(400, "Invalid role");
-
   try {
+    requiredInputs(
+      [
+        "firstName",
+        "email",
+        "lastName",
+        "password",
+        "confirmPassword",
+        "phoneNumber",
+        "role",
+        "barangay",
+      ],
+      req.body,
+      next
+    );
+
+    validateTypes(VALID_STAFF_ROLE, role);
+
     session.startTransaction();
 
     const staff = await User.findById(staffId);
@@ -375,7 +374,6 @@ export const updateStaff = async (req, res, next) => {
     }
 
     await session.commitTransaction();
-    session.endSession();
     res.status(200).json({
       success: true,
       message: "Succesfully updated staff",
@@ -383,7 +381,9 @@ export const updateStaff = async (req, res, next) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    session.endSession();
+
     next(error);
+  } finally {
+    session.endSession();
   }
 };

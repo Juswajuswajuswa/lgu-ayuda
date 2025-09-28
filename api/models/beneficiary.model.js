@@ -38,6 +38,11 @@ const BeneficiaryModelSchema = new mongoose.Schema(
       type: String,
     },
 
+    isApplied: {
+      type: Boolean,
+      default: false,
+    },
+
     // qrCode: {D
     //   type: String,
     // },

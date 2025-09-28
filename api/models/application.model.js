@@ -12,7 +12,11 @@ const ApplicationModelSchema = new mongoose.Schema(
       ref: "Ayuda",
       required: true,
     },
-    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    submittedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "verified", "approved", "rejected"],
