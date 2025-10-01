@@ -7,10 +7,21 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import TestPage from "./pages/test-page";
 import DashboardLayout from "./layouts/dashboard-layout";
+import AuthLayout from "./layouts/auth-layout";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <AuthLayout />,
+    children: [
+      {
+        path: "/",
+      },
+    ],
+  },
+
   {
     path: "/",
     element: <DashboardLayout />,
