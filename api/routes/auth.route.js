@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  checkAdmin,
   createStaff,
   deleteStaff,
   registerAdmin,
@@ -12,6 +13,7 @@ import { requireRole } from "../middleware/roles.js";
 
 const router = express.Router();
 
+router.get(`/admin`, checkAdmin);
 router.post(`/register-admin`, sendAdminEmailOTP);
 router.post(`/create-admin`, registerAdmin);
 router.post(`/create-staff`, requireAuth, requireRole("admin"), createStaff);
