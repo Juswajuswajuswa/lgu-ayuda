@@ -28,6 +28,20 @@ function cleanupExpiredOTPs() {
   }
 }
 
+export const checkAdmin = async (req, res, next) => {
+  try {
+    const isAdminExist = await User.findOne({ role: "admin" });
+    if (!isAdminExist)
+      throw new AppError(400, "Admin does not exist. create one");
+
+    res
+      .status(200)
+      .json({ success: true, message: "Admin exist", data: isAdminExist });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const sendAdminEmailOTP = async (req, res, next) => {
   const { email } = req.body;
 
