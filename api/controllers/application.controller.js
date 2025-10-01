@@ -172,23 +172,32 @@ export const deleteApplication = async (req, res, next) => {
 
     const beneficiaryInApplication = application.beneficiary;
 
+    if (beneficiaryInApplication)
+      throw new AppError(400, "No beneficiary in application found");
+
     const deletedApplication = await Application.findByIdAndDelete(
       applicationId
     ).session();
 
     // LOG
+    //
 
-    await Beneficiary.findByIdAndUpdate(beneficiaryInApplication, {
-      $set: {
-        isApplied: false,
+    await Beneficiary.findByIdAndUpdate(
+      beneficiaryInApplication,
+      {
+        $set: {
+          isApplied: false,
+        },
       },
-    }).session();
+      { new: true }
+    ).session();
 
     await session.commitTransaction();
     res.status(200).json({
       success: true,
       message: "Successfully deleted an application",
       deleted: deletedApplication,
+      deletedBy: userId,
     });
   } catch (error) {
     await session.abortTransaction();

@@ -10,9 +10,9 @@ export const registerBeneficiary = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   const { fullName, dob, gender, phoneNumber, address } = req.body;
-  requiredInputs(["fullName", "dob", "gender", "phoneNumber"], req.body);
 
   try {
+    requiredInputs(["fullName", "dob", "gender", "phoneNumber"], req.body);
     let beneficiaryAddress;
     if (address) {
       const { street, barangay, city } = address;
@@ -61,7 +61,6 @@ export const registerBeneficiary = async (req, res, next) => {
     }
 
     await session.commitTransaction();
-    session.endSession();
     res.status(201).json({
       success: true,
       message: "Successfully registered a user",
@@ -72,8 +71,9 @@ export const registerBeneficiary = async (req, res, next) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    session.endSession();
     next(error);
+  } finally {
+    session.endSession();
   }
 };
 
@@ -159,9 +159,9 @@ export const updateBeneficiary = async (req, res, next) => {
 
   const { beneficiaryId } = req.params;
   const { fullName, dob, gender, phoneNumber, address } = req.body;
-  requiredInputs(["fullName", "dob", "gender", "phoneNumber"], req.body);
 
   try {
+    requiredInputs(["fullName", "dob", "gender", "phoneNumber"], req.body);
     const beneficiary = await Beneficiary.findById(beneficiaryId);
     if (!beneficiary) throw new AppError(400, "Beneficiary not found");
 
@@ -219,7 +219,6 @@ export const updateBeneficiary = async (req, res, next) => {
     }
 
     await session.commitTransaction();
-    session.endSession();
     res.status(200).json({
       success: true,
       message: "Successfully updated beneficiary",
@@ -227,7 +226,8 @@ export const updateBeneficiary = async (req, res, next) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    session.endSession();
     next(error);
+  } finally {
+    session.endSession();
   }
 };

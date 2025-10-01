@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 
-function RootLayout() {
+function DashboardLayout() {
   return (
     <div>
       <header></header>
@@ -12,4 +12,4 @@ function RootLayout() {
   );
 }
 
-export default RootLayout;
+export default DashboardLayout;
