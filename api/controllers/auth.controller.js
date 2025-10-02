@@ -102,6 +102,20 @@ export const sendAdminEmailOTP = async (req, res, next) => {
   }
 };
 
+export const adminVerifyOtp = async (req, res, next) => {
+  const { otp } = req.body 
+
+  try {
+
+
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 export const registerAdmin = async (req, res, next) => {
   const { email, otp } = req.body;
   requiredInputs(["email", "otp"], req.body, next);

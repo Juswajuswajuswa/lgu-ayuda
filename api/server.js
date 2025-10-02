@@ -12,7 +12,7 @@ import barangayRoutes from "../api/routes/barangay.route.js";
 import beneficiaryRoutes from "../api/routes/beneficiary.route.js";
 import ayudaRoutes from "../api/routes/ayuda.route.js";
 import applicationRoutes from "../api/routes/application.route.js";
-import budgetRoutes from "../api/routes/budget.route.js";
+
 //
 import { handleError } from "./middleware/handleError.js";
 
@@ -36,7 +36,6 @@ app.use(`/api/barangay`, barangayRoutes);
 app.use(`/api/beneficiary`, beneficiaryRoutes);
 app.use(`/api/ayuda`, ayudaRoutes);
 app.use(`/api/application`, applicationRoutes);
-app.use(`/api/budget`, budgetRoutes);
 
 connectDb()
   .then(() => {
