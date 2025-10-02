@@ -2,12 +2,14 @@ import mongoose from "mongoose";
 
 const GoodsModelSchema = new mongoose.Schema(
   {
-   product: {
-    
-   },
+    product: {
+      name: { type: String, required: true },
+      details: { type: String, required: true },
+    },
     quantity: {
       type: Number,
       required: true,
+      default: 0,
     },
   },
   { timeTamps: true }

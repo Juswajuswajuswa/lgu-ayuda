@@ -103,22 +103,7 @@ export const sendAdminEmailOTP = async (req, res, next) => {
 };
 
 export const adminVerifyOtp = async (req, res, next) => {
-  const { otp } = req.body 
-
-  try {
-
-
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-
-
-export const registerAdmin = async (req, res, next) => {
   const { email, otp } = req.body;
-  requiredInputs(["email", "otp"], req.body, next);
 
   try {
     const stored = otpStore.get(email);
@@ -131,13 +116,34 @@ export const registerAdmin = async (req, res, next) => {
 
     if (stored.otp !== otp) throw new AppError(400, "Invalid OTP");
 
+    res.status(200).json({ success: true, message: "Correct OTP. success." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const registerAdmin = async (req, res, next) => {
+  try {
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      confirmPassword,
+      phoneNumber,
+    } = req.body;
+    requiredInputs(["email", "password"], req.body, next);
+
+    if (password.trim() != confirmPassword.trim())
+      throw new AppError(400, "Passwords does not match. Please try again.");
+
     const createAdmin = new User({
       email,
-      firstName: "John",
-      lastName: "Doe",
-      password: "123456",
+      firstName,
+      lastName,
+      password,
       role: "admin",
-      phoneNumber: "09123456789",
+      phoneNumber,
     });
 
     const { accessToken } = generateTokens(createAdmin._id);
