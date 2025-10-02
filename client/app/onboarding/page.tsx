@@ -31,8 +31,12 @@ export default function OnboardingPage() {
             <form>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" placeholder="John Doe" />
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input id="firstName" placeholder="John" />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input id="lastName" placeholder="Doe" />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="password">Password</Label>
@@ -47,6 +51,10 @@ export default function OnboardingPage() {
                     <Input id="confirmPassword" type="password" />
                     <EyeIcon className="absolute right-2 top-1/2 -translate-y-1/2" />
                   </div>
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Input type="number" id="phoneNumber" placeholder="09******13" />
                 </div>
               </div>
               <div className="mt-5">
