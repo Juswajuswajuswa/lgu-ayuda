@@ -1,13 +1,16 @@
+import { GradientBackground } from "@/components/ui/gradient-background";
+
 export default function AuthLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <>
-      <main className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-6xl">{children}</div>
-      </main>
-    </>
+    <GradientBackground
+      className="from-slate-900 via-purple-900 to-slate-950"
+      transition={{ duration: 15, ease: "easeInOut", repeat: Infinity }}
+    >
+      {children}
+    </GradientBackground>
   );
 }
