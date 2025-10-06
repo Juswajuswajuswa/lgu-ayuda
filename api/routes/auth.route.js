@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  adminVerifyOtp,
   checkAdmin,
   createStaff,
   deleteStaff,
@@ -15,7 +16,8 @@ const router = express.Router();
 
 router.get(`/admin`, checkAdmin);
 router.post(`/register-admin`, sendAdminEmailOTP);
-router.post(`/create-admin`, registerAdmin);
+router.post(`/verify-token`, adminVerifyOtp);
+router.post(`/onboarding`, registerAdmin);
 router.post(`/create-staff`, requireAuth, requireRole("admin"), createStaff);
 router.post(`/signin`, signin);
 router.delete(

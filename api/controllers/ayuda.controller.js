@@ -41,7 +41,7 @@ export const getAyudas = async (req, res, next) => {
   try {
     const ayudas = await Ayuda.find().sort({ createdAt: -1 });
     if (!ayudas && ayudas.length === 0)
-      res.json({ message: "Empty ayuda", ayudas: [] });
+      return res.json({ message: "Empty ayuda", ayudas: [] });
     res.status(200).json({ success: true, data: ayudas });
   } catch (error) {
     next(error);

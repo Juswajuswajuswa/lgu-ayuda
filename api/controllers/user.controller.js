@@ -41,3 +41,17 @@ export const getStaffs = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCurrentUser = async (req, res, next) => {
+  const userId = req.user.id;
+
+  try {
+    const currentUser = await User.findById(userId);
+    if (!currentUser) throw new AppError(400, "User not found");
+    res
+      .status(200)
+      .json({ success: true, message: "user found", data: currentUser });
+  } catch (error) {
+    next(error);
+  }
+};
