@@ -21,18 +21,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { data: isAdminExist } = useQuery({
-    queryKey: ["isAdminExist"],
-    queryFn: async () => {
-      const res = await axiosInstance.get("/auth/admin");
-      return res.data.success;
-    },
-  });
-
-  if (isAdminExist) {
-    redirect("/login");
-  }
-
   return (
     <div
       className={cn(
