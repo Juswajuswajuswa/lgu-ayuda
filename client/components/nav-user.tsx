@@ -43,11 +43,11 @@ export function NavUser({
   const router = useRouter();
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
-      await axiosInstance.post("/auth/logout");
+      await axiosInstance.post("/auth/signout");
     },
     onSuccess: () => {
-      toast.success("Logged out successfully");
       router.push("/login");
+      toast.success("Logged out successfully");
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);

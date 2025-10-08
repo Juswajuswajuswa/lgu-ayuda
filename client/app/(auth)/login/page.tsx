@@ -7,9 +7,9 @@ import { redirect } from "next/navigation";
 export default function Login() {
   const { user, isLoading } = useRequiredUser();
 
-  if (user && !isLoading) {
-    redirect("/dashboard");
+  if (!user) {
+    return <div>{!isLoading && <LoginPage />}</div>;
   }
 
-  return <div>{!isLoading && <LoginPage />}</div>;
+  redirect("/dashboard");
 }

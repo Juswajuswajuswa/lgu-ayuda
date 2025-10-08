@@ -1,21 +1,12 @@
-"use client";
-
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useRequiredUser } from "@/hooks/useRequiredUser";
-import { redirect } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoading } = useRequiredUser();
-  if (!user && !isLoading) {
-    redirect("/login");
-  }
-
   return (
     <SidebarProvider
       style={
