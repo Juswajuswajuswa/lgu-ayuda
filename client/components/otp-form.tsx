@@ -22,7 +22,7 @@ import {
 import Logo from "../public/Logo.png";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
@@ -57,6 +57,26 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       toast.error(error.response?.data?.message || "Invalid OTP");
     },
   });
+
+  const { mutate: resendOtpMutation } = useMutation({
+    mutationFn: async ({ email }: { email: string }) => {
+      const res = await axiosInstance.post(`/auth/resend-otp`, {
+        email: email,
+      });
+
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  const resendSubmit = () => {
+    resendOtpMutation({ email: decodedEmail });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +115,7 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit}>
+        <form>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="otp">Verification code</FieldLabel>
@@ -120,11 +140,21 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
               </FieldDescription>
             </Field>
             <FieldGroup>
-              <Button type="submit" disabled={isPending || otp.length !== 6}>
+              <Button
+                onClick={handleSubmit}
+                disabled={isPending || otp.length !== 6}
+              >
                 {isPending ? "Verifying..." : "Verify"}
               </Button>
               <FieldDescription className="text-center">
-                Didn&apos;t receive the code? <a href="#">Resend</a>
+                Didn&apos;t receive the code?{" "}
+                <button
+                  type="button"
+                  onClick={resendSubmit}
+                  className="text-gray-600 underline cursor-pointer"
+                >
+                  Resend
+                </button>
               </FieldDescription>
             </FieldGroup>
           </FieldGroup>
