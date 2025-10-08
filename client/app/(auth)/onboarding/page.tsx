@@ -44,7 +44,7 @@ export default function OnboardingPage() {
     },
     onSuccess: (data) => {
       toast.success(data.message);
-      router.push("/dashboard");
+      router.push("/login");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Internal server error");
