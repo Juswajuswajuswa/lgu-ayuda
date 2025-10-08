@@ -147,9 +147,6 @@ export const registerAdmin = async (req, res, next) => {
       phoneNumber,
     });
 
-    const { accessToken } = generateTokens(createAdmin._id);
-    setCookies(res, accessToken);
-
     // Remove OTP after successful registration
     otpStore.delete(email);
 
@@ -426,8 +423,10 @@ export const updateStaff = async (req, res, next) => {
 export const authenticatedUser = async (req, res, next) => {
   const user = req.user;
 
+  console.log(req.user);
+
   try {
-    if (user) return res.status(200).json({ success: true, data: userId });
+    if (user) return res.status(200).json({ success: true, data: user });
 
     res.status(400).json({ success: false, message: "Not aunthenticated" });
   } catch (error) {
