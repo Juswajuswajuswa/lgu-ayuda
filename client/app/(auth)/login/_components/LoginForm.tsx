@@ -1,4 +1,4 @@
-
+"use client";
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,11 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Link from "next/link";
+import axiosInstance from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const { data: isAdminExist } = useQuery({
+    queryKey: ["isAdminExist"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/auth/admin");
+      return res.data.success;
+    },
+  });
+
+  if (isAdminExist) {
+    redirect("/login");
+  }
+
   return (
     <div
       className={cn(

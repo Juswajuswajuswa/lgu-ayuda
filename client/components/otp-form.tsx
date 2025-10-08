@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,21 +21,83 @@ import {
 } from "@/components/ui/input-otp";
 import Logo from "../public/Logo.png";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
+  const [otp, setOtp] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const email = searchParams.get("email");
+
+  const { mutate: verifyOtp, isPending } = useMutation({
+    mutationFn: async ({ email, otp }: { email: string; otp: string }) => {
+      const res = await axiosInstance.post("/auth/verify-token", {
+        email,
+        otp,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Redirect to admin registration form or dashboard after successful OTP verification
+      router.push("/");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Invalid OTP");
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Email not found");
+      return;
+    }
+    if (otp.length !== 6) {
+      toast.error("Please enter a complete 6-digit OTP");
+      return;
+    }
+    verifyOtp({ email, otp });
+  };
+
+  if (!email) {
+    return (
+      <Card {...props}>
+        <CardHeader className="space-y-2">
+          <Image src={Logo} alt="Logo" width={40} height={40} />
+          <CardTitle>Email Required</CardTitle>
+          <CardDescription>
+            Please access this page with a valid email parameter.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
     <Card {...props}>
       <CardHeader className="space-y-2">
         <Image src={Logo} alt="Logo" width={40} height={40} />
         <CardTitle>Enter verification code</CardTitle>
-        <CardDescription>We sent a 6-digit code to your email.</CardDescription>
+        <CardDescription>We sent a 6-digit code to {email}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="otp">Verification code</FieldLabel>
-              <InputOTP maxLength={6} id="otp" required>
+              <InputOTP
+                maxLength={6}
+                id="otp"
+                required
+                value={otp}
+                onChange={setOtp}
+              >
                 <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
@@ -48,7 +112,9 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
               </FieldDescription>
             </Field>
             <FieldGroup>
-              <Button type="submit">Verify</Button>
+              <Button type="submit" disabled={isPending || otp.length !== 6}>
+                {isPending ? "Verifying..." : "Verify"}
+              </Button>
               <FieldDescription className="text-center">
                 Didn&apos;t receive the code? <a href="#">Resend</a>
               </FieldDescription>

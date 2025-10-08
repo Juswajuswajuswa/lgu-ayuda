@@ -1,11 +1,41 @@
+"use client";
+
 import Logo from "../public/Logo.png";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function CreateAdminPage() {
+  const [email, setEmail] = useState("");
+
+  const router = useRouter();
+
+  const { mutate: registerAdmin, isPending } = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await axiosInstance.post("/auth/register-admin", { email });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Redirect to verify-otp page with email parameter after successful API call
+      router.push(`/verify-otp?email=${email}`);
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
+    },
+  });
+
+  const handleRegisterAdmin = () => {
+    registerAdmin(email);
+  };
+
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
@@ -26,42 +56,25 @@ export default function CreateAdminPage() {
           <hr className="my-4 border-dashed" />
 
           <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="firstname" className="block text-sm">
-                  Firstname
-                </Label>
-                <Input type="text" required name="firstname" id="firstname" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastname" className="block text-sm">
-                  Lastname
-                </Label>
-                <Input type="text" required name="lastname" id="lastname" />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="email" className="block text-sm">
                 Email
               </Label>
-              <Input type="email" required name="email" id="email" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pwd" className="text-sm">
-                Password
-              </Label>
               <Input
-                type="password"
+                type="email"
                 required
-                name="pwd"
-                id="pwd"
-                className="input sz-md variant-mixed"
+                name="email"
+                id="email"
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-
-            <Button className="w-full">Continue</Button>
+            <Button
+              className="w-full"
+              onClick={handleRegisterAdmin}
+              disabled={isPending}
+            >
+              Continue
+            </Button>
           </div>
         </div>
 

@@ -4,8 +4,18 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Logo from "../public/Logo.png";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios";
 
 export default function LoginPage() {
+  const { data: isAdminExist, isLoading } = useQuery({
+    queryKey: ["isAdminExist"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/auth/admin");
+      return res.data.success;
+    },
+  });
+
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
@@ -60,14 +70,16 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="bg-muted rounded-(--radius) border p-3">
-          <p className="text-accent-foreground text-center text-sm">
-            Don't have an account ?
-            <Button asChild variant="link" className="px-2">
-              <Link href="/create-admin">Create Admin</Link>
-            </Button>
-          </p>
-        </div>
+        {!isAdminExist && !isLoading && (
+          <div className="bg-muted rounded-(--radius) border p-3">
+            <p className="text-accent-foreground text-center text-sm">
+              Don't have an account ?
+              <Button asChild variant="link" className="px-2">
+                <Link href="/create-admin">Create Admin</Link>
+              </Button>
+            </p>
+          </div>
+        )}
       </form>
     </section>
   );

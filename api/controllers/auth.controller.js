@@ -31,12 +31,15 @@ function cleanupExpiredOTPs() {
 export const checkAdmin = async (req, res, next) => {
   try {
     const isAdminExist = await User.findOne({ role: "admin" });
-    if (!isAdminExist)
-      throw new AppError(400, "Admin does not exist. create one");
+    if (isAdminExist) {
+      return res
+        .status(200)
+        .json({ success: true, message: "Admin exist", data: isAdminExist });
+    }
 
     res
-      .status(200)
-      .json({ success: true, message: "Admin exist", data: isAdminExist });
+      .status(201)
+      .json({ success: false, message: "Admin not exist", data: isAdminExist });
   } catch (error) {
     next(error);
   }
@@ -55,22 +58,22 @@ export const sendAdminEmailOTP = async (req, res, next) => {
     cleanupExpiredOTPs();
     // rate limiting to prevent spam request
     const lastAttempt = rateLimitStore.get(`${email}`);
-    if (lastAttempt) {
-      const cooldownMs = 5 * 60 * 1000; //5 minutes
-      const timeSinceLastAttempt = Date.now() - lastAttempt;
+    // if (lastAttempt) {
+    //   const cooldownMs = 5 * 60 * 1000; //5 minutes
+    //   const timeSinceLastAttempt = Date.now() - lastAttempt;
 
-      if (timeSinceLastAttempt < cooldownMs) {
-        // Calculate remaining time in minutes (rounded up)
-        const timeLeftMinutes = Math.ceil(
-          (cooldownMs - timeSinceLastAttempt) / (1000 * 60)
-        );
+    //   if (timeSinceLastAttempt < cooldownMs) {
+    //     // Calculate remaining time in minutes (rounded up)
+    //     const timeLeftMinutes = Math.ceil(
+    //       (cooldownMs - timeSinceLastAttempt) / (1000 * 60)
+    //     );
 
-        throw new AppError(
-          429,
-          `Please wait ${timeLeftMinutes} minutes before requesting another.`
-        );
-      }
-    }
+    //     throw new AppError(
+    //       429,
+    //       `Please wait ${timeLeftMinutes} minutes before requesting another.`
+    //     );
+    //   }
+    // }
 
     const otp = generateOTP();
     const expires = Date.now() + 5 * 60 * 1000;
