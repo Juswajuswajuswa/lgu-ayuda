@@ -93,7 +93,7 @@ export const sendAdminEmailOTP = async (req, res, next) => {
     );
 
     res.status(200).json({
-      sucess: true,
+      success: true,
       message: "OTP sent successfully",
       data: {
         email: email,
@@ -126,16 +126,15 @@ export const adminVerifyOtp = async (req, res, next) => {
 };
 
 export const registerAdmin = async (req, res, next) => {
+  const { email } = req.params;
   try {
-    const {
-      email,
-      firstName,
-      lastName,
-      password,
-      confirmPassword,
-      phoneNumber,
-    } = req.body;
-    requiredInputs(["email", "password"], req.body, next);
+    const { firstName, lastName, password, confirmPassword, phoneNumber } =
+      req.body;
+    requiredInputs(
+      ["firstName", "lastName", "password", "confirmPassword", "phoneNumber"],
+      req.body,
+      next
+    );
 
     if (password.trim() != confirmPassword.trim())
       throw new AppError(400, "Passwords does not match. Please try again.");

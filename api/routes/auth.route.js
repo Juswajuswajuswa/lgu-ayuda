@@ -17,7 +17,7 @@ const router = express.Router();
 router.get(`/admin`, checkAdmin);
 router.post(`/register-admin`, sendAdminEmailOTP);
 router.post(`/verify-token`, adminVerifyOtp);
-router.post(`/onboarding`, registerAdmin);
+router.post(`/onboarding/:email`, registerAdmin);
 router.post(`/create-staff`, requireAuth, requireRole("admin"), createStaff);
 router.post(`/signin`, signin);
 router.delete(

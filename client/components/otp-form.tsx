@@ -33,19 +33,25 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email");
+  const decodedEmail = decodeURIComponent(email || "");
 
   const { mutate: verifyOtp, isPending } = useMutation({
-    mutationFn: async ({ email, otp }: { email: string; otp: string }) => {
-      const res = await axiosInstance.post("/auth/verify-token", {
-        email,
+    mutationFn: async ({
+      decodedEmail,
+      otp,
+    }: {
+      decodedEmail: string;
+      otp: string;
+    }) => {
+      const res = await axiosInstance.post(`/auth/verify-token`, {
+        email: decodedEmail,
         otp,
       });
       return res.data;
     },
     onSuccess: (data) => {
       toast.success(data.message);
-      // Redirect to admin registration form or dashboard after successful OTP verification
-      router.push("/");
+      router.push(`/onboarding?email=${encodeURIComponent(decodedEmail)}`);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Invalid OTP");
@@ -62,7 +68,7 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       toast.error("Please enter a complete 6-digit OTP");
       return;
     }
-    verifyOtp({ email, otp });
+    verifyOtp({ decodedEmail, otp });
   };
 
   if (!email) {
@@ -84,7 +90,9 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       <CardHeader className="space-y-2">
         <Image src={Logo} alt="Logo" width={40} height={40} />
         <CardTitle>Enter verification code</CardTitle>
-        <CardDescription>We sent a 6-digit code to {email}</CardDescription>
+        <CardDescription>
+          We sent a 6-digit code to {decodedEmail}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>

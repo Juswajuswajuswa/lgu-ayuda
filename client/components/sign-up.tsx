@@ -23,23 +23,28 @@ export default function CreateAdminPage() {
       return res.data;
     },
     onSuccess: (data) => {
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
       toast.success(data.message);
-      // Redirect to verify-otp page with email parameter after successful API call
-      router.push(`/verify-otp?email=${email}`);
     },
     onError: (error: any) => {
-      toast.error(error.response.data.message);
+      console.error("Registration error:", error);
+      toast.error(error.response?.data?.message || "Registration failed");
     },
   });
 
-  const handleRegisterAdmin = () => {
+  const handleRegisterAdmin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Please enter an email address");
+      return;
+    }
     registerAdmin(email);
   };
 
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
-        action=""
+        onSubmit={handleRegisterAdmin}
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="p-8 pb-6">
@@ -68,12 +73,8 @@ export default function CreateAdminPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <Button
-              className="w-full"
-              onClick={handleRegisterAdmin}
-              disabled={isPending}
-            >
-              Continue
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Sending..." : "Continue"}
             </Button>
           </div>
         </div>
