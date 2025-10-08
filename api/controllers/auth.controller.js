@@ -423,8 +423,6 @@ export const updateStaff = async (req, res, next) => {
 export const authenticatedUser = async (req, res, next) => {
   const user = req.user;
 
-  console.log(req.user);
-
   try {
     if (user) return res.status(200).json({ success: true, data: user });
 
@@ -434,8 +432,21 @@ export const authenticatedUser = async (req, res, next) => {
   }
 };
 
-export const signOut = (req, res, next) => {
+export const signOut = async (req, res, next) => {
+  const user = req.user.id;
   try {
+    const validUser = await User.findById(user);
+
+    if (!validUser) throw new AppError(400, "No user");
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
+    res.status(200).json({ success: true, message: "Successfully logged out" });
   } catch (error) {
     next(error);
   }

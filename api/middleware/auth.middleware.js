@@ -6,7 +6,8 @@ export const requireAuth = async (req, res, next) => {
   const accessToken =
     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
-  if (!accessToken) throw new AppError(400, "You are not authorized.");
+  if (!accessToken)
+    return res.json({ success: false, message: "not authorized" });
 
   try {
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
