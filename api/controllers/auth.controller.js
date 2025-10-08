@@ -177,9 +177,9 @@ export const signin = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
 
-    const isPasswordValid = user ? user.comparePassword(password) : false;
+    const isValidPassword = await user.comparePassword(password);
 
-    if (!user || !isPasswordValid)
+    if (!user || !isValidPassword)
       throw new AppError(400, "Invalid email or password");
 
     const { accessToken } = generateTokens(user._id);
