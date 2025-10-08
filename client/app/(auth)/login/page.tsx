@@ -1,10 +1,15 @@
 "use client";
 
 import LoginPage from "@/components/login";
-import axiosInstance from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useRequiredUser } from "@/hooks/useRequiredUser";
 import { redirect } from "next/navigation";
 
 export default function Login() {
-  return <LoginPage />;
+  const { user, isLoading } = useRequiredUser();
+
+  if (user && !isLoading) {
+    redirect("/dashboard");
+  }
+
+  return <div>{!isLoading && <LoginPage />}</div>;
 }

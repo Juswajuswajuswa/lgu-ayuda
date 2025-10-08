@@ -4,10 +4,17 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Logo from "../public/Logo.png";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const router = useRouter();
   const { data: isAdminExist, isLoading } = useQuery({
     queryKey: ["isAdminExist"],
     queryFn: async () => {
@@ -16,10 +23,35 @@ export default function LoginPage() {
     },
   });
 
+  const { mutate: login, isPending } = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await axiosInstance.post("/auth/signin", data);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      router.push("/dashboard");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Internal server error");
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Please enter an email and password");
+      return;
+    }
+
+    login({ email, password });
+  };
+
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
-        action=""
+        onSubmit={handleSubmit}
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="p-8 pb-6">
@@ -40,7 +72,14 @@ export default function LoginPage() {
               <Label htmlFor="email" className="block text-sm">
                 Email
               </Label>
-              <Input type="email" required name="email" id="email" />
+              <Input
+                type="email"
+                required
+                name="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
 
             <div className="space-y-0.5">
@@ -63,10 +102,18 @@ export default function LoginPage() {
                 name="pwd"
                 id="pwd"
                 className="input sz-md variant-mixed"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
-            <Button className="w-full">Sign In</Button>
+            <Button
+              type="submit"
+              className="w-full"
+              onClick={() => login({ email, password })}
+            >
+              {isPending ? "Signing in..." : "Sign In"}
+            </Button>
           </div>
         </div>
 

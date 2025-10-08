@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRequiredUser } from "@/hooks/useRequiredUser";
 import axiosInstance from "@/lib/axios";
 import { useMutation } from "@tanstack/react-query";
 import { EyeIcon } from "lucide-react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -33,6 +34,11 @@ export default function OnboardingPage() {
     email: decodedEmail,
   });
   const router = useRouter();
+  const { user, isLoading } = useRequiredUser();
+
+  if (user && !isLoading) {
+    redirect("/dashboard");
+  }
 
   const { mutate: registerAdmin } = useMutation({
     mutationFn: async (data: any) => {
@@ -44,7 +50,7 @@ export default function OnboardingPage() {
     },
     onSuccess: (data) => {
       toast.success(data.message);
-      router.push("/dashboard");
+      router.push("/login");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Internal server error");

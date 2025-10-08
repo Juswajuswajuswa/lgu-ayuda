@@ -1,12 +1,19 @@
 "use client";
 
 import CreateAdminPage from "@/components/sign-up";
+import { useRequiredUser } from "@/hooks/useRequiredUser";
 import axiosInstance from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 
 export default function CreateAdmin() {
-  const { data: isAdminExist, isLoading } = useQuery({
+  const { user, isLoading } = useRequiredUser();
+
+  if (user && !isLoading) {
+    redirect("/dashboard");
+  }
+
+  const { data: isAdminExist, isPending } = useQuery({
     queryKey: ["isAdminExist"],
     queryFn: async () => {
       const res = await axiosInstance.get("/auth/admin");
@@ -18,5 +25,5 @@ export default function CreateAdmin() {
     redirect("/");
   }
 
-  return <div>{!isAdminExist && !isLoading && <CreateAdminPage />}</div>;
+  return <div>{!isAdminExist && !isPending && <CreateAdminPage />}</div>;
 }
