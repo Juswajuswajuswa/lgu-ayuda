@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRequiredUser } from "@/hooks/useRequiredUser";
 import axiosInstance from "@/lib/axios";
 import { useMutation } from "@tanstack/react-query";
 import { EyeIcon } from "lucide-react";
 import Image from "next/image";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -34,12 +33,6 @@ export default function OnboardingPage() {
     email: decodedEmail,
   });
   const router = useRouter();
-  const { user, isLoading } = useRequiredUser();
-
-  if (user && !isLoading) {
-    redirect("/dashboard");
-  }
-
   const { mutate: registerAdmin } = useMutation({
     mutationFn: async (data: any) => {
       const res = await axiosInstance.post(

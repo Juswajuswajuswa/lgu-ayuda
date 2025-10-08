@@ -54,6 +54,11 @@ export function NavUser({
     },
   });
 
+  const handleLogout = (e: React.FormEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    logout();
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -114,7 +119,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconLogout />
-              <button onClick={() => logout()}>Log out</button>
+              <button onClick={handleLogout}>Log out</button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
