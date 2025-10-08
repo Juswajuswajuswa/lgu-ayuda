@@ -180,7 +180,9 @@ export const signin = async (req, res, next) => {
     const isValidPassword = await user.comparePassword(password);
 
     if (!user || !isValidPassword)
-      throw new AppError(400, "Invalid email or password");
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid username or password" });
 
     const { accessToken } = generateTokens(user._id);
     setCookies(res, accessToken);
@@ -200,6 +202,7 @@ export const signin = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+    console.log(error);
   }
 };
 
