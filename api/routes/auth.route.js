@@ -6,6 +6,7 @@ import {
   createStaff,
   deleteStaff,
   registerAdmin,
+  resendOTP,
   sendAdminEmailOTP,
   signin,
   signOut,
@@ -24,6 +25,7 @@ router.post(`/create-staff`, requireAuth, requireRole("admin"), createStaff);
 router.post(`/signin`, signin);
 router.get(`/authenticated`, requireAuth, authenticatedUser);
 router.post(`/signout`, requireAuth, signOut);
+router.post(`/resend-otp`, resendOTP);
 router.delete(
   `/delete-staff/:staffId`,
   requireAuth,

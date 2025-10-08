@@ -45,6 +45,43 @@ export const checkAdmin = async (req, res, next) => {
   }
 };
 
+export const resendOTP = async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) throw new AppError(400, "Email is required");
+
+  try {
+    const otp = generateOTP();
+    const expires = Date.now() + 5 * 60 * 1000;
+
+    otpStore.set({
+      otp,
+      expires,
+    });
+
+    rateLimitStore.set(`${email}`, Date.now());
+
+    await sendEmail(
+      email,
+      "Your Login OTP",
+      `Your One-Time Password (OTP) for login is: ${otp}
+      This OTP will expire in 5 minutes. Please do not share it with anyone.`
+    );
+
+    res.status(200).json({
+      sucess: true,
+      message: "OTP sent successfully",
+      data: {
+        email: email,
+        expires: expires,
+        // link: urlLink,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const sendAdminEmailOTP = async (req, res, next) => {
   const { email } = req.body;
 
