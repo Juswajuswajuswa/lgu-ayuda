@@ -8,6 +8,7 @@ import {
   registerAdmin,
   sendAdminEmailOTP,
   signin,
+  signOut,
   updateStaff,
 } from "../controllers/auth.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
@@ -21,7 +22,8 @@ router.post(`/verify-token`, adminVerifyOtp);
 router.post(`/onboarding/:email`, registerAdmin);
 router.post(`/create-staff`, requireAuth, requireRole("admin"), createStaff);
 router.post(`/signin`, signin);
-router.get(`/authenticated`, requireAuth, authenticatedUser)
+router.get(`/authenticated`, requireAuth, authenticatedUser);
+router.post(`/signout`, requireAuth, signOut);
 router.delete(
   `/delete-staff/:staffId`,
   requireAuth,
