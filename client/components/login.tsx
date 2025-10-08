@@ -33,7 +33,7 @@ export default function LoginPage() {
       router.push("/dashboard");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Internal server error");
+      toast.error(error.response.data.message);
     },
   });
 
