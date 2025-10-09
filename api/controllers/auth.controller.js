@@ -54,7 +54,7 @@ export const resendOTP = async (req, res, next) => {
     const otp = generateOTP();
     const expires = Date.now() + 5 * 60 * 1000;
 
-    otpStore.set({
+    otpStore.set(email, {
       otp,
       expires,
     });
