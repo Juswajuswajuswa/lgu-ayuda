@@ -58,6 +58,22 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
     },
   });
 
+  const { mutate: resendOtp, isPending: isResendingOtp } = useMutation({
+    mutationFn: async ({ decodedEmail }: { decodedEmail: string }) => {
+      const res = await axiosInstance.post(`/auth/resend-otp`, {
+        email: decodedEmail,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to resend OTP");
+      console.log(error);
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
@@ -69,6 +85,11 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       return;
     }
     verifyOtp({ decodedEmail, otp });
+  };
+
+  const handleResend = (e: React.FormEvent) => {
+    e.preventDefault();
+    resendOtp({ decodedEmail });
   };
 
   if (!email) {
@@ -95,40 +116,50 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit}>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="otp">Verification code</FieldLabel>
+            <InputOTP
+              maxLength={6}
+              id="otp"
+              required
+              value={otp}
+              onChange={setOtp}
+            >
+              <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            <FieldDescription>
+              Enter the 6-digit code sent to your email.
+            </FieldDescription>
+          </Field>
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="otp">Verification code</FieldLabel>
-              <InputOTP
-                maxLength={6}
-                id="otp"
-                required
-                value={otp}
-                onChange={setOtp}
+            <Button
+              type="submit"
+              disabled={isPending || otp.length !== 6}
+              onClick={handleSubmit}
+            >
+              {isPending ? "Verifying..." : "Verify"}
+            </Button>
+            <FieldDescription className="text-center">
+              Didn&apos;t receive the code?{" "}
+              <button
+                type="submit"
+                className="underline cursor-pointer"
+                onClick={handleResend}
+                disabled={isResendingOtp}
               >
-                <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-              <FieldDescription>
-                Enter the 6-digit code sent to your email.
-              </FieldDescription>
-            </Field>
-            <FieldGroup>
-              <Button type="submit" disabled={isPending || otp.length !== 6}>
-                {isPending ? "Verifying..." : "Verify"}
-              </Button>
-              <FieldDescription className="text-center">
-                Didn&apos;t receive the code? <a href="#">Resend</a>
-              </FieldDescription>
-            </FieldGroup>
+                {isResendingOtp ? "Resending..." : "Resend"}
+              </button>
+            </FieldDescription>
           </FieldGroup>
-        </form>
+        </FieldGroup>
       </CardContent>
     </Card>
   );
