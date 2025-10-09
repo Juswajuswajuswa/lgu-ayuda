@@ -13,6 +13,8 @@ import beneficiaryRoutes from "../api/routes/beneficiary.route.js";
 import ayudaRoutes from "../api/routes/ayuda.route.js";
 import applicationRoutes from "../api/routes/application.route.js";
 import goodsRoutes from "../api/routes/goods.route.js";
+import distributionRoutes from "../api/routes/distribution.route.js";
+import projectRoutes from "../api/routes/project.route.js";
 
 //
 import { handleError } from "./middleware/handleError.js";
@@ -43,6 +45,8 @@ app.use(`/api/beneficiary`, beneficiaryRoutes);
 app.use(`/api/ayuda`, ayudaRoutes);
 app.use(`/api/application`, applicationRoutes);
 app.use(`/api/goods`, goodsRoutes);
+app.use(`/api/distribute`, distributionRoutes);
+app.use(`/api/project`, projectRoutes);
 
 connectDb()
   .then(() => {

@@ -21,11 +21,11 @@ const BeneficiaryModelSchema = new mongoose.Schema(
     },
     // houseHoldSize: {}, ??
     // income: { type: String, enum: ["low", "middle", "high"], default: "low" },
-    status: {
-      type: String,
-      enum: ["registered", "approved", "rejected"],
-      default: "registered",
-    },
+    // status: {
+    //   type: String,
+    //   enum: ["registered", "approved", "rejected"],
+    //   default: "registered",
+    // },
 
     validId: [
       {
@@ -41,6 +41,11 @@ const BeneficiaryModelSchema = new mongoose.Schema(
     isApplied: {
       type: Boolean,
       default: false,
+    },
+
+    status: {
+      type: String,
+      enum: ["claimed", "unclaimed"],
     },
 
     // qrCode: {D

@@ -20,7 +20,7 @@ const UserModelSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "validator", "encoder"], // what more???
+      enum: ["admin", "validator", "encoder", "distributer"], // what more???
     },
 
     barangay: {

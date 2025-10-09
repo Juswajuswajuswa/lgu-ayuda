@@ -8,6 +8,7 @@ import Barangay from "../models/barangay.model.js";
 import { AppError } from "../utils/appError.js";
 import mongoose from "mongoose";
 import { validateTypes } from "../utils/validateType.js";
+import { validateStaff } from "../validations/auth.validations.js";
 
 const VALID_STAFF_ROLE = ["encoder", "validator"];
 
@@ -170,7 +171,7 @@ export const registerAdmin = async (req, res, next) => {
     const { email } = req.params;
     const { firstName, lastName, password, confirmPassword, phoneNumber } =
       req.body;
-    requiredInputs(["email", "password"], req.body, next);
+    requiredInputs(["password"], req.body, res);
 
     if (password.trim() != confirmPassword.trim())
       throw new AppError(400, "Passwords does not match. Please try again.");
@@ -242,8 +243,8 @@ export const signin = async (req, res, next) => {
 export const createStaff = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  const userId = req.user.id;
 
+  const userId = req.user.id;
   const {
     firstName,
     email,
@@ -256,38 +257,40 @@ export const createStaff = async (req, res, next) => {
   } = req.body;
 
   try {
-    requiredInputs(
-      [
-        "firstName",
-        "email",
-        "lastName",
-        "password",
-        "confirmPassword",
-        "phoneNumber",
-        "role",
-        "barangay",
-      ],
-      req.body,
-      next
-    );
-
-    validateTypes(VALID_STAFF_ROLE, role);
-
-    if (password.trim() != confirmPassword.trim())
-      throw new AppError(400, "Passwords does not match. Please try again.");
-
-    const newStaff = new User({
+    // Use validation function
+    const validation = await validateStaff(
       firstName,
       lastName,
       email,
       password,
+      confirmPassword,
       phoneNumber,
+      role,
+      barangay
+    );
+
+    if (!validation.isValid) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
+    }
+
+    const newStaff = new User({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim().toLowerCase(),
+      password: password.trim(),
+      phoneNumber: phoneNumber.trim(),
       role,
       barangay,
     });
 
-    const savedStaff = await newStaff.save({ session: session });
+    const savedStaff = await newStaff.save({ session });
 
+    // Update barangay with staff reference
     await Barangay.findByIdAndUpdate(
       barangay,
       {
@@ -295,13 +298,14 @@ export const createStaff = async (req, res, next) => {
           staffs: newStaff._id,
         },
       },
-      { new: true, runValidators: true, session: session }
+      { new: true, session }
     );
 
     await session.commitTransaction();
+
     res.status(201).json({
       success: true,
-      message: "Succesfully created a staff",
+      message: "Successfully created staff", // Fixed typo: "Succesfully" → "Successfully"
       data: savedStaff,
     });
   } catch (error) {
@@ -375,24 +379,85 @@ export const updateStaff = async (req, res, next) => {
         "barangay",
       ],
       req.body,
-      next
+      res
     );
 
     validateTypes(VALID_STAFF_ROLE, role);
 
+    // Required field validation
+    if (firstName) {
+      if (!firstName || firstName.trim() === "") {
+        return res
+          .status(400)
+          .json({ success: false, message: "first name is required" });
+      }
+    }
+
+    if (lastName) {
+      if (!lastName || lastName.trim() === "") {
+        return res
+          .status(400)
+          .json({ success: false, message: "last name is required" });
+      }
+    }
+
+    if (email) {
+      if (!email || email.trim() === "") {
+        return res
+          .status(400)
+          .json({ success: false, message: "email is required" });
+      }
+    }
+
+    if (phoneNumber) {
+      if (!phoneNumber || phoneNumber.trim() === "") {
+        return res
+          .status(400)
+          .json({ success: false, message: "phone number is required" });
+      }
+    }
+
+    if (role) {
+      if (!role) {
+        return res
+          .status(400)
+          .json({ success: false, message: "role is required" });
+      }
+    }
+
+    if (!barangay) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Barangay is required" });
+    }
+
     session.startTransaction();
 
     const staff = await User.findById(staffId);
-    if (!staff) throw new AppError(400, "Staff not found");
-
-    let isPasswordChanged = false;
+    if (!staff)
+      return res.status(400).json({
+        success: false,
+        message: "Staff does not exist",
+      });
 
     if (password) {
+      if (!password || password.trim() === "") {
+        return res
+          .status(400)
+          .json({ success: false, message: "password is required" });
+      }
+
       if (password.trim() != confirmPassword.trim())
-        throw new AppError(400, "Passwords does not match. Please try again.");
+        return res.status(400).json({
+          success: false,
+          message: "Passwords does not match. Please try again.",
+        });
 
       if (await staff.comparePassword(password)) {
-        throw new AppError(400, "Cannot use previous password");
+        return res.status(400).json({
+          success: false,
+          message: "Cannot use previous password",
+        });
       } else {
         isPasswordChanged = true;
       }

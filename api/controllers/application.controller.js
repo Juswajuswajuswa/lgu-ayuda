@@ -4,31 +4,24 @@ import { AppError } from "../utils/appError.js";
 import { validateTypes } from "../utils/validateType.js";
 import Beneficiary from "../models/beneficiary.model.js";
 
-const VALID_APPLICATION_STATUS = [
-  "pending",
-  "verified",
-  "approved",
-  "rejected",
-];
+const VALID_APPLICATION_STATUS = ["pending", "approved", "rejected"];
 
 export const beneficiaryApplication = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const { beneficiary, ayuda, status, notes } = req.body;
+    const { beneficiary, ayuda, notes } = req.body;
     const userId = req.user.id;
 
     if (!userId) throw new AppError(400, "Invalid user ID");
     if (!beneficiary) throw new AppError(400, "Beneficiary is required");
     if (!ayuda) throw new AppError(400, "Ayuda is required");
 
-    validateTypes(VALID_APPLICATION_STATUS, status);
-
     const application = new Application({
       beneficiary,
       ayuda,
-      status,
+      status: "pending",
       submittedBy: userId,
       notes,
     });
@@ -137,6 +130,60 @@ export const getApplication = async (req, res, next) => {
   }
 };
 
+export const updateApplicationStatus = async (req, res, next) => {
+  try {
+    const { applicationId } = req.params;
+    const { status } = req.body;
+    validateTypes(VALID_APPLICATION_STATUS, status);
+
+    const application = await Application.findByIdAndUpdate(
+      applicationId,
+      { $set: { status: status } },
+      { new: true } // 'new: true' returns the updated document
+    );
+
+    if (!application)
+      return res
+        .status(200)
+        .json({ success: false, message: "Invalid applicationId" });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully updated status",
+      data: application,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// export const updateApplicationStatus = async (req, res, next) => {
+//   try {
+//     const { applicationId } = req.params;
+//     const { status } = req.body;
+//     validateTypes(VALID_APPLICATION_STATUS, status);
+
+//     const application = await Application.findById(applicationId);
+
+//     if (!application)
+//       return res
+//         .status(200)
+//         .json({ success: false, message: "Invalid applicationId" });
+
+//     application.status = status;
+
+//     await application.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Successfully updated a status",
+//       data: application,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const deleteAllApplications = async (req, res, next) => {
   try {
     const applications = await Application.find();
@@ -204,6 +251,111 @@ export const deleteApplication = async (req, res, next) => {
     next(error);
   } finally {
     session.endSession();
+  }
+};
+
+export const pendingApplications = async (req, res, next) => {
+  try {
+    const application = await Application.find({ status: "pending" })
+      .populate([
+        {
+          path: "beneficiary",
+          select: "fullName dob gender phoneNumber address isApplied",
+          populate: {
+            path: "address.barangay",
+            select: "name municipality province",
+          },
+        },
+        {
+          path: "ayuda",
+          select: "name",
+        },
+      ])
+      .sort({ createdAt: -1 });
+    if (!application || application.length === 0)
+      return res.json({
+        success: true,
+        mesasge: "Empty pending applications",
+        application: [],
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched pending applications",
+      data: application,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const approvedApplications = async (req, res, next) => {
+  try {
+    const application = await Application.find({ status: "approved" })
+      .populate([
+        {
+          path: "beneficiary",
+          select: "fullName dob gender phoneNumber address isApplied",
+          populate: {
+            path: "address.barangay",
+            select: "name municipality province",
+          },
+        },
+        {
+          path: "ayuda",
+          select: "name",
+        },
+      ])
+      .sort({ createdAt: -1 });
+    if (!application || application.length === 0)
+      return res.json({
+        success: true,
+        mesasge: "Empty approved applications",
+        application: [],
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched approved applications",
+      data: application,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const rejectedApplications = async (req, res, next) => {
+  try {
+    const application = await Application.find({ status: "rejected" })
+      .populate([
+        {
+          path: "beneficiary",
+          select: "fullName dob gender phoneNumber address isApplied",
+          populate: {
+            path: "address.barangay",
+            select: "name municipality province",
+          },
+        },
+        {
+          path: "ayuda",
+          select: "name",
+        },
+      ])
+      .sort({ createdAt: -1 });
+    if (!application || application.length === 0)
+      return res.json({
+        success: true,
+        mesasge: "Empty rejected applications",
+        application: [],
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched rejected applications",
+      data: application,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
