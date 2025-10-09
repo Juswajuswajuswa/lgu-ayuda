@@ -197,9 +197,6 @@ export const registerAdmin = async (req, res, next) => {
       message: "Admin created sucessfully!",
       data: {
         user: adminObject,
-        tokens: {
-          accessToken,
-        },
       },
     });
   } catch (error) {

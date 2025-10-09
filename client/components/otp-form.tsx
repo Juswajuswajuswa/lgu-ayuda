@@ -58,43 +58,22 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
     },
   });
 
-<<<<<<< HEAD
   const { mutate: resendOtp, isPending: isResendingOtp } = useMutation({
     mutationFn: async ({ decodedEmail }: { decodedEmail: string }) => {
       const res = await axiosInstance.post(`/auth/resend-otp`, {
         email: decodedEmail,
       });
-=======
-  const { mutate: resendOtpMutation } = useMutation({
-    mutationFn: async ({ email }: { email: string }) => {
-      const res = await axiosInstance.post(`/auth/resend-otp`, {
-        email: email,
-      });
-
->>>>>>> 7bb0c4776b691a29fb610443d74bc440552d32d8
       return res.data;
     },
     onSuccess: (data) => {
       toast.success(data.message);
     },
-<<<<<<< HEAD
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to resend OTP");
       console.log(error);
     },
   });
 
-=======
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
-
-  const resendSubmit = () => {
-    resendOtpMutation({ email: decodedEmail });
-  };
-
->>>>>>> 7bb0c4776b691a29fb610443d74bc440552d32d8
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
@@ -137,7 +116,6 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-<<<<<<< HEAD
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="otp">Verification code</FieldLabel>
@@ -161,9 +139,6 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
               Enter the 6-digit code sent to your email.
             </FieldDescription>
           </Field>
-=======
-        <form>
->>>>>>> 7bb0c4776b691a29fb610443d74bc440552d32d8
           <FieldGroup>
             <Button
               type="submit"
@@ -180,43 +155,9 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
                 onClick={handleResend}
                 disabled={isResendingOtp}
               >
-<<<<<<< HEAD
                 {isResendingOtp ? "Resending..." : "Resend"}
               </button>
             </FieldDescription>
-=======
-                <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border">
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-              <FieldDescription>
-                Enter the 6-digit code sent to your email.
-              </FieldDescription>
-            </Field>
-            <FieldGroup>
-              <Button
-                onClick={handleSubmit}
-                disabled={isPending || otp.length !== 6}
-              >
-                {isPending ? "Verifying..." : "Verify"}
-              </Button>
-              <FieldDescription className="text-center">
-                Didn&apos;t receive the code?{" "}
-                <button
-                  type="button"
-                  onClick={resendSubmit}
-                  className="text-gray-600 underline cursor-pointer"
-                >
-                  Resend
-                </button>
-              </FieldDescription>
-            </FieldGroup>
->>>>>>> 7bb0c4776b691a29fb610443d74bc440552d32d8
           </FieldGroup>
         </FieldGroup>
       </CardContent>

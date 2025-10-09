@@ -73,7 +73,7 @@ export default function OnboardingPage() {
               Admin Onboarding
             </CardTitle>
             <CardDescription>
-              Please fill out the form below to proceed with the dashboard.
+              Please fill out the form below to proceed with the signin.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
