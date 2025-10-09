@@ -5,12 +5,23 @@ import { AppError } from "../utils/appError.js";
 import User from "../models/user.models.js";
 import Barangay from "../models/barangay.model.js";
 import Beneficiary from "../models/beneficiary.model.js";
+import { validateBarangay } from "../validations/baranggay.validation.js";
 
 export const addBarangay = async (req, res, next) => {
   const { name, municipality, province } = req.body;
-  requiredInputs(["name", "municipality", "province"], req.body, next);
+  requiredInputs(["name", "municipality", "province"], req.body, res);
 
   try {
+    const validation = await validateBarangay(name, municipality, province);
+
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
+    }
+
     const newBarangay = new Baranggay({
       name,
       municipality,
@@ -92,35 +103,91 @@ export const deleteBarangay = async (req, res, next) => {
 };
 
 export const updateBarangay = async (req, res, next) => {
-  const { barangayId } = req.params;
-  const { name, municipality, province } = req.body;
-  requiredInputs(["name", "municipality", "province"], req.body, next);
-
   try {
-    const barangay = await Barangay.findById(barangayId);
-    if (!barangay) throw new AppError(400, "No barangay found");
+    const { barangayId } = req.params;
+    const { name, municipality, province } = req.body;
 
-    const barangayData = {
+    // Use the validateBarangay function
+    const validation = await validateBarangay(
       name,
       municipality,
       province,
-    };
+      barangayId
+    );
 
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
+    }
+
+    // Update barangay
     const updatedBarangay = await Barangay.findByIdAndUpdate(
       barangayId,
-      barangayData,
+      {
+        name: name.trim(),
+        municipality: municipality.trim(),
+        province: province.trim(),
+      },
       { new: true, runValidators: true }
     );
 
     res.status(200).json({
       success: true,
-      message: "Successfully updated a barangay",
+      message: "Successfully updated barangay",
       data: updatedBarangay,
     });
   } catch (error) {
     next(error);
   }
 };
+
+// export const updateBarangay = async (req, res, next) => {
+//   const { barangayId } = req.params;
+//   const { name, municipality, province } = req.body;
+//   requiredInputs(["name", "municipality", "province"], req.body, res);
+
+//   try {
+//     const isBarangayExist = await Barangay.findOne({
+//       name,
+//       municipality,
+//       province,
+//     }).select("name municipality province");
+
+//     if (isBarangayExist) {
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           "Barangay with the same name, municipality, and province already exists",
+//       });
+//     }
+
+//     const barangay = await Barangay.findById(barangayId);
+//     if (!barangay) throw new AppError(400, "No barangay found");
+
+//     const barangayData = {
+//       name,
+//       municipality,
+//       province,
+//     };
+
+//     const updatedBarangay = await Barangay.findByIdAndUpdate(
+//       barangayId,
+//       barangayData,
+//       { new: true, runValidators: true }
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Successfully updated a barangay",
+//       data: updatedBarangay,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const getSingleBarangay = async (req, res, next) => {
   const { barangayId } = req.params;

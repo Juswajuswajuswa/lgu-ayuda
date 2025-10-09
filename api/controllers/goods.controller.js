@@ -1,36 +1,38 @@
 import Goods from "../models/goods.model.js";
 import { AppError } from "../utils/appError.js";
 import { requiredInputs } from "../utils/requiredInputs.js";
+import { validateGoods } from "../validations/goods.validation.js";
 
 export const registerGoods = async (req, res, next) => {
   try {
     const { product, quantity } = req.body;
-    requiredInputs(["product", "quantity"], req.body);
 
-    if (!product || typeof product !== "object") {
-      throw new AppError(400, "Product object is required");
+    // Use validation function
+    const validation = await validateGoods(product, quantity);
+
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
     }
+
     const { name, details } = product;
-    if (!name) throw new AppError(400, "name is required");
-    if (!details) throw new AppError(400, "details is required");
-
-    // Validate quantity
-    if (quantity === undefined || quantity === null) {
-      throw new AppError(400, "quantity is required");
-    }
-    if (typeof quantity !== "number" || isNaN(quantity)) {
-      throw new AppError(400, "quantity must be a number");
-    }
 
     const newGoods = new Goods({
-      product: { name, details },
+      product: {
+        name: name.trim(),
+        details: details.trim(),
+      },
       quantity,
     });
 
     const savedGoods = await newGoods.save();
+
     res.status(201).json({
       success: true,
-      message: "Successfully added a goods",
+      message: "Successfully added goods",
       data: savedGoods,
     });
   } catch (error) {
@@ -74,30 +76,38 @@ export const updateGoods = async (req, res, next) => {
     const { goodsId } = req.params;
     const { product, quantity } = req.body;
 
-    requiredInputs(["product", "quantity"], req.body);
+    // Use validation function with goodsId for duplicate check
+    const validation = await validateGoods(product, quantity, goodsId);
 
-    if (!product || typeof product !== "object") {
-      throw new AppError(400, "Product object is required");
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
     }
+
+    // Check if goods exists
+    const existingGoods = await Goods.findById(goodsId);
+    if (!existingGoods) {
+      return res.status(404).json({
+        success: false,
+        message: "Goods not found",
+      });
+    }
+
     const { name, details } = product;
-    if (!name) throw new AppError(400, "name is required");
-    if (!details) throw new AppError(400, "details is required");
-
-    // Validate quantity
-    if (quantity === undefined || quantity === null) {
-      throw new AppError(400, "quantity is required");
-    }
-    if (typeof quantity !== "number" || isNaN(quantity)) {
-      throw new AppError(400, "quantity must be a number");
-    }
 
     const updatedGoods = await Goods.findByIdAndUpdate(
       goodsId,
       {
-        product: { name, details },
+        product: {
+          name: name.trim(),
+          details: details.trim(),
+        },
         quantity,
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({

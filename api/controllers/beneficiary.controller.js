@@ -2,9 +2,8 @@ import mongoose, { isValidObjectId, set } from "mongoose";
 import Beneficiary from "../models/beneficiary.model.js";
 import { AppError } from "../utils/appError.js";
 import { requiredInputs } from "../utils/requiredInputs.js";
-import QRCode from "qrcode";
 import Barangay from "../models/barangay.model.js";
-import crypto from "crypto";
+import { validateBeneficiary } from "../validations/beneficiary.validation.js";
 
 export const registerBeneficiary = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -12,7 +11,24 @@ export const registerBeneficiary = async (req, res, next) => {
   const { fullName, dob, gender, phoneNumber, address } = req.body;
 
   try {
-    requiredInputs(["fullName", "dob", "gender", "phoneNumber"], req.body);
+    // Use validation function instead of requiredInputs
+    const validation = await validateBeneficiary(
+      fullName,
+      dob,
+      gender,
+      phoneNumber,
+      address
+    );
+
+    if (!validation.isValid) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
+    }
+
     let beneficiaryAddress;
     if (address) {
       const { street, barangay, city } = address;
@@ -31,7 +47,6 @@ export const registerBeneficiary = async (req, res, next) => {
       dob,
       gender,
       phoneNumber,
-      status: "registered",
       address: beneficiaryAddress,
     });
 
@@ -161,51 +176,76 @@ export const updateBeneficiary = async (req, res, next) => {
   const { fullName, dob, gender, phoneNumber, address } = req.body;
 
   try {
-    requiredInputs(["fullName", "dob", "gender", "phoneNumber"], req.body);
+    // Use validation function instead of requiredInputs
+    const validation = await validateBeneficiary(
+      fullName,
+      dob,
+      gender,
+      phoneNumber,
+      address,
+      beneficiaryId
+    );
+
+    if (!validation.isValid) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validation.errors,
+      });
+    }
+
+    // Check if beneficiary exists
     const beneficiary = await Beneficiary.findById(beneficiaryId);
-    if (!beneficiary) throw new AppError(400, "Beneficiary not found");
+    if (!beneficiary) {
+      throw new AppError(404, "Beneficiary not found");
+    }
 
     let beneficiaryAddress;
+    let oldBarangayId = beneficiary.address?.barangay;
 
     if (address) {
       const { street, barangay, city } = address;
-      if (!street || !barangay || !city) {
-        throw new AppError(400, "Please input required fields under address");
+
+      // Verify barangay exists (already checked in validation, but double-check for safety)
+      const barangayExists = await Barangay.findById(barangay).session(session);
+      if (!barangayExists) {
+        throw new AppError(400, "Barangay does not exist");
       }
 
-      if (!isValidObjectId(barangay))
-        throw new AppError(400, "Invalid Barangay ID");
+      beneficiaryAddress = {
+        street: street.trim(),
+        city: city.trim(),
+        barangay,
+      };
 
-      if (barangay) {
-        if (barangay !== beneficiary.address.barangay) {
-          await Barangay.findByIdAndUpdate(
-            beneficiary.address.barangay,
-            {
-              $pull: {
-                beneficiaries: beneficiaryId,
-              },
+      // Remove beneficiary from old barangay if barangay changed
+      if (oldBarangayId && barangay !== oldBarangayId.toString()) {
+        await Barangay.findByIdAndUpdate(
+          oldBarangayId,
+          {
+            $pull: {
+              beneficiaries: beneficiaryId,
             },
-            { new: true }
-          ).session(session);
-        }
+          },
+          { session }
+        );
       }
-
-      beneficiaryAddress = { street, city, barangay };
     }
 
     const updatedBeneficiary = await Beneficiary.findByIdAndUpdate(
       beneficiaryId,
       {
-        fullName,
+        fullName: fullName.trim(),
         dob,
-        gender,
-        phoneNumber,
-        status: "registered",
+        gender: gender.toLowerCase(),
+        phoneNumber: phoneNumber.trim(),
         address: beneficiaryAddress,
       },
-      { new: true }
+      { new: true, session } // Added session here
     );
 
+    // Add beneficiary to new barangay (only if barangay changed or new address)
     if (beneficiaryAddress?.barangay) {
       await Barangay.findByIdAndUpdate(
         beneficiaryAddress.barangay,
@@ -214,8 +254,8 @@ export const updateBeneficiary = async (req, res, next) => {
             beneficiaries: updatedBeneficiary._id,
           },
         },
-        { new: true }
-      ).session(session);
+        { session } // Added session here
+      );
     }
 
     await session.commitTransaction();

@@ -6,11 +6,42 @@ import { validateTypes } from "../utils/validateType.js";
 const VALID_AYUDA_TYPES = ["cash", "goods"];
 
 export const registerAyuda = async (req, res, next) => {
-  const { name, description, amount, type, budget } = req.body;
+  const { name, description, amount, goods, type, budget } = req.body;
 
   if (type === "cash") {
-    if (!amount || amount <= 0)
-      throw new AppError(400, "Amount is required for cash type");
+    if (!amount || amount !== 0)
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount is required for cash type" });
+    if (amount <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount must be a valid number" });
+    }
+    if (amount > budget) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount cannot exceed budget" });
+    }
+  }
+
+  if (type === "goods") {
+    if (!Array.isArray(goods)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Goods must be an array" });
+    }
+    if (!goods || goods.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Goods are required" });
+    }
+
+    if (goods.length >= 5) {
+      return res
+        .status(400)
+        .json({ success: false, message: "goods must not greater than 5" });
+    }
   }
 
   requiredInputs(["name", "description", "type", "budget"], req.body);
@@ -21,6 +52,7 @@ export const registerAyuda = async (req, res, next) => {
       name,
       description,
       amount: type === "cash" ? amount : undefined,
+      goods: type === "goods" ? goods : undefined,
       type,
       budget,
     });
@@ -81,8 +113,19 @@ export const updateAyuda = async (req, res, next) => {
   const { name, description, amount, type, budget } = req.body;
 
   if (type === "cash") {
-    if (!amount || amount <= 0) {
-      throw new AppError(400, "Amount is required for cash type");
+    if (!amount || amount !== 0)
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount is required for cash type" });
+    if (amount <= 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount must be a valid number" });
+    }
+    if (amount > budget) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Amount cannot exceed budget" });
     }
   }
 
@@ -118,7 +161,7 @@ export const updateAyuda = async (req, res, next) => {
 export const deleteAyudas = async (req, res, next) => {
   try {
     const ayudas = await Ayuda.find();
-    if (!ayudas.length === 0) throw new AppError(400, "No ayudas to delete");
+    if (ayudas.length === 0) throw new AppError(400, "No ayudas to delete");
 
     const deletedAyudas = await Ayuda.deleteMany();
     res.status(200).json({

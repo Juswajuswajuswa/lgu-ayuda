@@ -5,6 +5,12 @@ const AyudaModelSchema = new mongoose.Schema(
     name: { type: String, required: true },
     description: { type: String },
     amount: { type: Number },
+    goods: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Goods",
+      },
+    ],
     type: { type: String, enum: ["cash", "goods"], default: "cash" },
     // eligibilityRules: { type: Object },
     budget: { type: Number, required: true },
