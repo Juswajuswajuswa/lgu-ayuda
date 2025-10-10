@@ -4,10 +4,12 @@ const TodoSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+    unique: true,
   },
-  completed: {
-    type: Boolean,
-    default: false,
+  status: {
+    type: String,
+    enum: ["in progress", "completed", "cancelled"],
+    default: "in progress",
   },
 });
 
@@ -15,8 +17,21 @@ const ProjectModelSchema = new mongoose.Schema({
   projectName: {
     type: String,
     required: true,
+    unique: true,
   },
   projectTodos: [TodoSchema], // embedded subdocuments
+  description: {
+    type: String,
+  },
+  budget: {
+    type: Number,
+    default: 0,
+  },
+  status: {
+    type: String,
+    enum: ["in progress", "completed", "cancelled"],
+    default: "in progress",
+  },
 });
 
 const Project = mongoose.model("Project", ProjectModelSchema);

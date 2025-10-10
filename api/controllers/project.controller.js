@@ -1,9 +1,29 @@
-import mongoose from "mongoose";
+import mongoose, { set } from "mongoose";
 import Project from "../models/project.model.js";
+import { validateTypes } from "../utils/validateType.js";
+
+const VALID_STATUS = ["in progress", "completed", "cancelled"];
 
 export const addProjectName = async (req, res, next) => {
   try {
-    const { projectName } = req.body;
+    const { projectName, budget, description } = req.body;
+
+    if (!description) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Description is required" });
+    }
+
+    if (!budget)
+      return res
+        .status(400)
+        .json({ sucess: false, message: "Budget is requied" });
+
+    if (!typeof budget === "number") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Budget must be a number" });
+    }
 
     if (!projectName)
       return res
@@ -12,6 +32,9 @@ export const addProjectName = async (req, res, next) => {
 
     const project = new Project({
       projectName,
+      budget,
+      description,
+      status: "in progress",
       projectTodos: [],
     });
 
@@ -101,10 +124,12 @@ export const deleteTodos = async (req, res, next) => {
   }
 };
 
-export const updateToComplete = async (req, res, next) => {
+export const updateTodoStatus = async (req, res, next) => {
   try {
     const { id, todoId } = req.params;
-    const { completed } = req.body;
+    const { status } = req.body;
+
+    validateTypes(VALID_STATUS, status, res);
 
     if (
       !mongoose.Types.ObjectId.isValid(id) ||
@@ -115,12 +140,10 @@ export const updateToComplete = async (req, res, next) => {
         .json({ success: false, message: "Invalid ID format" });
     }
 
-    if (typeof completed !== "boolean") {
-      return res.status(400).json({
-        success: false,
-        message: "Completed field must be true or false",
-      });
-    }
+    if (!status)
+      return res
+        .status(400)
+        .json({ success: false, message: "status is required" });
 
     const project = await Project.findById(id);
     if (!project)
@@ -128,14 +151,26 @@ export const updateToComplete = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "invalid project id" });
     const projectTodo = project.projectTodos.id(todoId);
+    const projectTodosArray = project.projectTodos;
     if (!projectTodo)
       return res
         .status(400)
         .json({ success: false, message: "Invalid project todo id" });
 
-    projectTodo.completed = completed;
+    projectTodo.status = status;
 
-    // 5️⃣ Save the updated project
+    if (projectTodosArray && projectTodosArray.length > 0) {
+      const allCompleted = projectTodosArray.every(
+        (item) => item.status === "completed"
+      );
+
+      if (allCompleted) {
+        project.status = "completed";
+      } else {
+        project.status = "in progress";
+      }
+    }
+
     await project.save();
 
     res.status(200).json({
@@ -148,16 +183,46 @@ export const updateToComplete = async (req, res, next) => {
   }
 };
 
-export const updateProjectName = async (req, res, next) => {
+export const updateProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { projectName } = req.body;
+    const { projectName, description, budget } = req.body;
+
+    if (description) {
+      if (!description) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Description is required" });
+      }
+    }
+
+    if (budget) {
+      if (!typeof budget === "number") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Budget must be a number" });
+      }
+
+      if (!budget)
+        return res
+          .status(400)
+          .json({ sucess: false, message: "Budget is requied" });
+    }
+
+    if (projectName) {
+      if (!projectName)
+        return res
+          .status(400)
+          .json({ success: false, message: "Project name is required" });
+    }
 
     const project = await Project.findByIdAndUpdate(
       id,
       {
         $set: {
           projectName: projectName,
+          description: description,
+          budget: budget,
         },
       },
       { new: true }
@@ -231,14 +296,71 @@ export const deleteProject = async (req, res, next) => {
       return res
         .status(400)
         .json({ success: false, message: "Invalid project id" });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "successfully deleted a project",
-        deleted: deleteProject,
-      });
+    res.status(200).json({
+      success: true,
+      message: "successfully deleted a project",
+      deleted: deleteProject,
+    });
   } catch (error) {
     next(error);
+  }
+};
+
+export const deleteAllProjects = async (req, res, next) => {
+  try {
+    const project = await Project.find();
+    if (project.length === 0)
+      return res
+        .status(400)
+        .json({ success: true, message: "No projects to be deleted " });
+
+    const projects = await Project.deleteMany();
+    res.status(204).json({
+      success: true,
+      message: "all projects are deleted",
+      deleted: projects,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProjectStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    validateTypes(VALID_STATUS, status, res);
+
+    const project = await Project.findById(id);
+    const projectTodo = project.projectTodos;
+
+    if (!project) {
+      return res
+        .status(400)
+        .json({ sucess: false, message: "invalid project update id" });
+    }
+
+    project.status = status;
+
+    updateStatus(status, projectTodo);
+
+    await project.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully updated a status to ${status}`,
+      data: project,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateStatus = (status, array) => {
+  if (status === `${status}`) {
+    array.map((item) => {
+      item.status = `${status}`;
+    });
   }
 };

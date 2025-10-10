@@ -4,11 +4,13 @@ import { requireRole } from "../middleware/roles.js";
 import {
   addProjectName,
   addTodoToProject,
+  deleteAllProjects,
   deleteProject,
   deleteTodos,
   getProjects,
-  updateProjectName,
-  updateToComplete,
+  updateProject,
+  updateProjectStatus,
+  updateTodoStatus,
   updateTodoTitle,
 } from "../controllers/project.controller.js";
 
@@ -20,8 +22,10 @@ router.post(`/add-todos/:id`, addTodoToProject);
 router.get(`/get-projects`, getProjects);
 router.delete(`/:id/delete/:todoId`, deleteTodos);
 router.delete(`/:id/delete-project`, deleteProject);
-router.post(`/:id/update-complete/:todoId`, updateToComplete);
-router.post(`/:id/update-projectName`, updateProjectName);
+router.post(`/:id/update-status/:todoId`, updateTodoStatus);
+router.post(`/:id/update-projectName`, updateProject);
 router.post(`/:id/update-title/:todoId`, updateTodoTitle);
+router.delete(`/delete-all`, deleteAllProjects);
+router.put(`/:id/update-project-status`, updateProjectStatus);
 
 export default router;
