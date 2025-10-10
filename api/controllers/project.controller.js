@@ -364,3 +364,19 @@ const updateStatus = (status, array) => {
     });
   }
 };
+
+export const getSingleProject = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const project = await Project.findById(id);
+    if (!project)
+      return res
+        .status(400)
+        .json({ success: false, message: "project does not exist" });
+    res
+      .status(200)
+      .json({ success: true, message: "project found", data: project });
+  } catch (error) {
+    next(error);
+  }
+};
