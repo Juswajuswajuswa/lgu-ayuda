@@ -29,10 +29,12 @@ export default function EditBarangayPage() {
   } = useQuery({
     queryKey: ["goods", id],
     queryFn: async () => {
-      const res = await axiosInstance.get(`/goods/single-goods/${id}`);
-      return res.data.data;
+      const res = await axiosInstance.get(`/goods/get-good/${id}`);
+      return res.data.goods;
     },
   });
+
+  console.log(goods);
 
   const [formData, setFormData] = useState({
     product: {
