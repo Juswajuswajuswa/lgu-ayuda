@@ -78,52 +78,6 @@ export default function CreateStaffPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // if (formData.firstName === "") {
-    //   toast.error("First name is required");
-    //   return;
-    // }
-
-    // if (formData.lastName === "") {
-    //   toast.error("Last name is required");
-    //   return;
-    // }
-
-    // if (formData.barangay === "") {
-    //   toast.error("Barangay is required");
-    //   return;
-    // }
-
-    // if (formData.role === "") {
-    //   toast.error("Role is required");
-    //   return;
-    // }
-
-    // if (formData.phoneNumber === "") {
-    //   toast.error("Phone number is required");
-    //   return;
-    // }
-
-    // const regex = /^(09|\+639)\d{9}$/;
-    // if (!regex.test(formData.phoneNumber)) {
-    //   toast.error("Phone number is not valid");
-    //   return;
-    // }
-
-    // if (formData.email === "") {
-    //   toast.error("Email is required");
-    //   return;
-    // }
-
-    // if (formData.password === "") {
-    //   toast.error("Password is required");
-    //   return;
-    // }
-
-    // if (formData.password !== formData.confirmPassword) {
-    //   toast.error("Passwords does not match");
-    //   return;
-    // }
-
     createStaff(formData);
   };
   return (
@@ -171,14 +125,21 @@ export default function CreateStaffPage() {
             <div className="flex gap-6 w-full">
               <div className="w-full space-y-2">
                 <Label htmlFor="barangay">Barangay</Label>
-                <Input
-                  id="barangay"
-                  placeholder="Lower Bicutan"
+                <Select
                   value={formData.barangay}
-                  onChange={(e) =>
-                    setFormData({ ...formData, barangay: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, barangay: value })
                   }
-                />
+                >
+                  <SelectTrigger id="barangay" className="w-full">
+                    <SelectValue placeholder="Please select a barangay" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="validator">Validator</SelectItem>
+                    <SelectItem value="encoder">Encoder</SelectItem>
+                    <SelectItem value="distributer">Distributer</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="w-full space-y-2">
                 <Label htmlFor="role">Role</Label>
