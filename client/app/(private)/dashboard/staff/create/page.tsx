@@ -49,57 +49,66 @@ export default function CreateStaffPage() {
       router.push("/dashboard/staff");
     },
     onError: (error: any) => {
-      toast.error(error.response.data.message);
+      const serverError = error?.response?.data;
+
+      if (serverError?.message === "Validation failed" && serverError?.errors) {
+        Object.entries(serverError.errors).forEach(([field, message]) => {
+          toast.error(`${field}: ${message}`);
+        });
+      } else {
+        toast.error(serverError?.message || "Something went wrong");
+      }
     },
   });
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (formData.firstName === "") {
-      toast.error("First name is required");
-      return;
-    }
+    // if (formData.firstName === "") {
+    //   toast.error("First name is required");
+    //   return;
+    // }
 
-    if (formData.lastName === "") {
-      toast.error("Last name is required");
-      return;
-    }
+    // if (formData.lastName === "") {
+    //   toast.error("Last name is required");
+    //   return;
+    // }
 
-    if (formData.barangay === "") {
-      toast.error("Barangay is required");
-      return;
-    }
+    // if (formData.barangay === "") {
+    //   toast.error("Barangay is required");
+    //   return;
+    // }
 
-    if (formData.role === "") {
-      toast.error("Role is required");
-      return;
-    }
+    // if (formData.role === "") {
+    //   toast.error("Role is required");
+    //   return;
+    // }
 
-    if (formData.phoneNumber === "") {
-      toast.error("Phone number is required");
-      return;
-    }
+    // if (formData.phoneNumber === "") {
+    //   toast.error("Phone number is required");
+    //   return;
+    // }
 
-    const regex = /^(09|\+639)\d{9}$/;
-    if (!regex.test(formData.phoneNumber)) {
-      toast.error("Phone number is not valid");
-      return;
-    }
+    // const regex = /^(09|\+639)\d{9}$/;
+    // if (!regex.test(formData.phoneNumber)) {
+    //   toast.error("Phone number is not valid");
+    //   return;
+    // }
 
-    if (formData.email === "") {
-      toast.error("Email is required");
-      return;
-    }
+    // if (formData.email === "") {
+    //   toast.error("Email is required");
+    //   return;
+    // }
 
-    if (formData.password === "") {
-      toast.error("Password is required");
-      return;
-    }
+    // if (formData.password === "") {
+    //   toast.error("Password is required");
+    //   return;
+    // }
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords does not match");
-      return;
-    }
+    // if (formData.password !== formData.confirmPassword) {
+    //   toast.error("Passwords does not match");
+    //   return;
+    // }
 
     createStaff(formData);
   };

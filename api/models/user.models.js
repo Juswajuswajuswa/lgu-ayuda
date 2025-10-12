@@ -27,6 +27,8 @@ const UserModelSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Barangay",
     },
+
+    
   },
   { timestamps: true }
 );

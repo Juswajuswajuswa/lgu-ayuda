@@ -83,19 +83,44 @@ export const resendOTP = async (req, res, next) => {
   }
 };
 
+export const forgetPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const isEmailExist = await User.findOne({ email });
+
+    if (!isEmailExist)
+      return res.status(400).json({ sucess: false, message: "Invalid email" });
+
+
+
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Successfully sent an OTP to your Email",
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const sendAdminEmailOTP = async (req, res, next) => {
   const { email } = req.body;
 
-  if (!email) throw new AppError(400, "Email is required.");
+  if (!email)
+    return res
+      .status(400)
+      .json({ sucess: false, message: "Email is required." });
 
   try {
     const existingEmail = await User.exists({ email });
-    if (existingEmail)
-      throw new AppError(400, "This email is already exist. try new one.");
+    if (existingEmail);
 
     cleanupExpiredOTPs();
     // rate limiting to prevent spam request
-    const lastAttempt = rateLimitStore.get(`${email}`);
+    // const lastAttempt = rateLimitStore.get(`${email}`);
     // if (lastAttempt) {
     //   const cooldownMs = 5 * 60 * 1000; //5 minutes
     //   const timeSinceLastAttempt = Date.now() - lastAttempt;
@@ -171,7 +196,11 @@ export const registerAdmin = async (req, res, next) => {
     const { email } = req.params;
     const { firstName, lastName, password, confirmPassword, phoneNumber } =
       req.body;
-    requiredInputs(["password"], req.body, res);
+    requiredInputs(
+      ["password", "firstName", "lastName", "phoneNumber"],
+      req.body,
+      res
+    );
 
     if (password.trim() != confirmPassword.trim())
       throw new AppError(400, "Passwords does not match. Please try again.");
@@ -207,21 +236,30 @@ export const registerAdmin = async (req, res, next) => {
 
 export const signin = async (req, res, next) => {
   const { email, password } = req.body;
-  requiredInputs(["email", "password"], req.body, next);
+
+  requiredInputs(["email", "password"], req.body, res);
 
   try {
     const user = await User.findOne({ email });
 
-    const isValidPassword = await user.comparePassword(password);
+    // Check if user exists before calling comparePassword
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid email" });
+    }
 
-    if (!user || !isValidPassword)
+    // Proceed with password comparison after checking for user existence
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid username or password" });
+        .json({ success: false, message: "Invalid password" });
+    }
 
+    // Generate token
     const { accessToken } = generateTokens(user._id);
     setCookies(res, accessToken);
 
+    // Prepare user object excluding password
     const userObject = user.toObject();
     delete userObject.password;
 
@@ -236,7 +274,7 @@ export const signin = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    next(error); // Pass error to global error handler
   }
 };
 
@@ -552,3 +590,4 @@ export const signOut = async (req, res, next) => {
     next(error);
   }
 };
+
