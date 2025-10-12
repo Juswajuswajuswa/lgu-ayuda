@@ -3,6 +3,7 @@ import { requireAuth } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/roles.js";
 import {
   deleteGoods,
+  getGood,
   getGoods,
   registerGoods,
   updateGoods,
@@ -25,6 +26,8 @@ router.put(
   requireRole("admin"),
   updateGoods
 );
+
+router.get("/get-good/:goodsId", getGood);
 
 router.delete(
   `/delete-goods/:goodsId`,

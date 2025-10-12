@@ -23,7 +23,7 @@ export default function CreateAdminPage() {
       return res.data;
     },
     onSuccess: (data) => {
-      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+      router.push(`/verify-otp?board&email=${encodeURIComponent(email)}`);
       toast.success(data.message);
     },
     onError: (error: any) => {

@@ -119,3 +119,20 @@ export const updateGoods = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getGood = async (req, res, next) => {
+  try {
+    const { goodsId } = req.params;
+
+    const goods = await Goods.findById(goodsId);
+
+    if (!goods)
+      return res.status(400).json({ success: false, message: "invalid id" });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Successfully fetched", goods });
+  } catch (error) {
+    next(error);
+  }
+};
