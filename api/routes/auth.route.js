@@ -5,9 +5,11 @@ import {
   checkAdmin,
   createStaff,
   deleteStaff,
+  forgetPassword,
   registerAdmin,
   resendOTP,
   sendAdminEmailOTP,
+  sendForgetPasswordOtp,
   signin,
   signOut,
   updateStaff,
@@ -26,6 +28,10 @@ router.post(`/signin`, signin);
 router.get(`/authenticated`, requireAuth, authenticatedUser);
 router.post(`/signout`, requireAuth, signOut);
 router.post(`/resend-otp`, resendOTP);
+
+router.post(`/send-forgetpassword`, sendForgetPasswordOtp);
+router.put(`/forget-password/:email`, forgetPassword);
+
 router.delete(
   `/delete-staff/:staffId`,
   requireAuth,

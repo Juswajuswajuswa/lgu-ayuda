@@ -1,10 +1,29 @@
+"use client";
+
 import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import axiosInstance from "@/lib/axios";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
+  const { mutate: sendForgetPasswordMutation, isPending } = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosInstance.post(`/auth/send-forgetpassword`, data);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (err) => {
+      // toast.error(err?.response?.data?.message || "something went wron");
+      console.log(err);
+    },
+  });
+
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
