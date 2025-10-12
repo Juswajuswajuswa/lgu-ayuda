@@ -6,10 +6,11 @@ import {
   CardDescription,
   CardAction,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { columns, Staff } from "./columns";
 import { DataTable } from "./data-table";
+import Link from "next/link";
 
 async function getData(): Promise<Staff[]> {
   return [
@@ -32,10 +33,13 @@ export default async function StaffPage() {
           <CardTitle>Staff</CardTitle>
           <CardDescription>List of all staff members.</CardDescription>
           <CardAction>
-            <Button>
+            <Link
+              href="/dashboard/staff/create"
+              className={buttonVariants({ variant: "default" })}
+            >
               <PlusIcon />
               Add Staff
-            </Button>
+            </Link>
           </CardAction>
         </CardHeader>
         <CardContent>
