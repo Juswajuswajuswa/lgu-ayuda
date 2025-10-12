@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -10,28 +10,52 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
+import Link from "next/link";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Staff = {
-  id: string;
-  name: string;
-  role: "encoder" | "validator";
+  _id: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   email: string;
+  role: string;
+  barangay: {
+    _id: string;
+    name: string;
+    municipality: string;
+    province: string;
+  };
 };
 
 export const columns: ColumnDef<Staff>[] = [
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "firstName",
+    header: "First Name",
+  },
+  {
+    accessorKey: "lastName",
+    header: "Last Name",
+  },
+  {
+    accessorKey: "phoneNumber",
+    header: "Phone Number",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
   },
   {
     accessorKey: "role",
     header: "Role",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "barangay",
+    header: "Barangay",
+    cell: ({ row }) => {
+      return <span>{row.original.barangay?.name}</span>;
+    },
   },
   {
     accessorKey: "actions",
@@ -46,10 +70,14 @@ export const columns: ColumnDef<Staff>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>
-                {" "}
-                <PencilIcon className="w-4 h-4" />
-                Edit
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/staff/edit/${row.original._id}`}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  Edit
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive">

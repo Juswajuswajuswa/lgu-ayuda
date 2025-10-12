@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -7,24 +9,25 @@ import {
   CardAction,
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
-import { columns, Staff } from "./columns";
+import { Loader2, PlusIcon } from "lucide-react";
+import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import Link from "next/link";
+import axiosInstance from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
 
-async function getData(): Promise<Staff[]> {
-  return [
-    {
-      id: "728ed52f",
-      name: "John Doe",
-      role: "encoder",
-      email: "john.doe@example.com",
+export default function StaffPage() {
+  const {
+    data: staffs,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["staffs"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/user/get-staffs");
+      return res.data;
     },
-  ];
-}
-
-export default async function StaffPage() {
-  const data = await getData();
+  });
 
   return (
     <>
@@ -43,7 +46,18 @@ export default async function StaffPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={data} />
+          {isPending ? (
+            <div className="h-24 flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Loading...</span>
+            </div>
+          ) : isError ? (
+            <div className="h-24 flex items-center justify-center text-destructive">
+              Error loading staff data.
+            </div>
+          ) : (
+            <DataTable columns={columns} data={staffs.users || []} />
+          )}
         </CardContent>
       </Card>
     </>
