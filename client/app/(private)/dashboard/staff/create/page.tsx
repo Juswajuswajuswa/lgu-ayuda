@@ -21,7 +21,7 @@ import {
   SelectContent,
 } from "@/components/ui/select";
 import axiosInstance from "@/lib/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 export default function CreateStaffPage() {
@@ -60,6 +60,20 @@ export default function CreateStaffPage() {
       }
     },
   });
+
+  const {
+    data: barangay,
+    isPending: isBarangayPending,
+    isError: isBarangayError,
+  } = useQuery({
+    queryKey: ["barangay"],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/barangay/get-barangays`);
+      return res.data;
+    },
+  });
+
+  console.log(barangay);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
