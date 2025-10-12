@@ -80,9 +80,14 @@ export const columns: ColumnDef<Staff>[] = [
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
-                <TrashIcon className="w-4 h-4" />
-                Delete
+              <DropdownMenuItem variant="destructive" asChild>
+                <Link
+                  href={`/dashboard/staff/delete/${row.original._id}`}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  Delete
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

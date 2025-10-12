@@ -76,7 +76,7 @@ export default function EditStaffPage() {
 
   const { mutate: updateStaff, isPending } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.post(`/auth/update-staff/${id}`, data);
+      const res = await axiosInstance.put(`/auth/update-staff/${id}`, data);
       return res.data;
     },
     onSuccess: (data) => {
