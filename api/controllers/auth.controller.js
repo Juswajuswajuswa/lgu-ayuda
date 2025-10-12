@@ -9,6 +9,7 @@ import { AppError } from "../utils/appError.js";
 import mongoose from "mongoose";
 import { validateTypes } from "../utils/validateType.js";
 import { validateStaff } from "../validations/auth.validations.js";
+import bcrypt from "bcryptjs";
 
 const VALID_STAFF_ROLE = ["encoder", "validator"];
 
@@ -83,7 +84,9 @@ export const resendOTP = async (req, res, next) => {
   }
 };
 
-export const forgetPassword = async (req, res, next) => {
+const passwordResetAttempts = new Map();
+
+export const sendForgetPasswordOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
 
@@ -92,15 +95,102 @@ export const forgetPassword = async (req, res, next) => {
     if (!isEmailExist)
       return res.status(400).json({ sucess: false, message: "Invalid email" });
 
+    // Check if the email has a recent reset attempt
+    const lastAttempt = passwordResetAttempts.get(email);
+    if (lastAttempt) {
+      const cooldownMs = 5 * 60 * 1000; // 5 minutes in milliseconds
+      const timeSinceLastAttempt = Date.now() - lastAttempt;
 
+      if (timeSinceLastAttempt < cooldownMs) {
+        const timeLeftMinutes = Math.ceil(
+          (cooldownMs - timeSinceLastAttempt) / (1000 * 60)
+        );
+        return next(
+          handleMakeError(
+            429,
+            `Please wait ${timeLeftMinutes} minute(s) before requesting another reset.`
+          )
+        );
+      }
+    }
 
+    passwordResetAttempts.set(email, Date.now());
+    const otp = generateOTP();
+    const expires = Date.now() + 5 * 60 * 1000;
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Successfully sent an OTP to your Email",
+    otpStore.set(email, {
+      otp,
+      expires,
+    });
+
+    rateLimitStore.set(`${email}`, Date.now());
+
+    const validUser = await User.findOne({ email });
+    if (!validUser) {
+      // Return a generic message to prevent email enumeration
+      return next(
+        handleMakeError(
+          400,
+          "If this email exists, a recovery link has been sent."
+        )
+      );
+    }
+
+    await sendEmail(
+      email,
+      "Your Login OTP",
+      `Your One-Time Password (OTP) for login is: ${otp}
+      This OTP will expire in 5 minutes. Please do not share it with anyone.`
+    );
+
+    res.status(200).json({
+      sucess: true,
+      message: "OTP sent successfully",
+      data: {
+        email: email,
+        expires: expires,
+        // link: urlLink,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const forgetPassword = async (req, res, next) => {
+  try {
+    const { email } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    const validUser = await User.findOne({ email });
+    if (!validUser)
+      return res.status(400).json({ success: false, message: "Invalid email" });
+
+    if (password.trim() != confirmPassword.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords does not match. Please try again.",
       });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const savedUser = await User.findByIdAndUpdate(
+      validUser._id,
+      {
+        $set: {
+          password: hashedPassword,
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully sent an otp to your email",
+      data: savedUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -203,7 +293,10 @@ export const registerAdmin = async (req, res, next) => {
     );
 
     if (password.trim() != confirmPassword.trim())
-      throw new AppError(400, "Passwords does not match. Please try again.");
+      return res.status(400).json({
+        success: false,
+        message: "Passwords does not match. Please try again.",
+      });
 
     const createAdmin = new User({
       email,
@@ -392,34 +485,20 @@ export const deleteStaff = async (req, res, next) => {
 
 export const updateStaff = async (req, res, next) => {
   const session = await mongoose.startSession();
+  session.startTransaction();
   const { staffId } = req.params;
   const {
     firstName,
     email,
     lastName,
-    password,
-    confirmPassword,
+    // password,
+    // confirmPassword,
     phoneNumber,
     role,
     barangay,
   } = req.body;
 
   try {
-    requiredInputs(
-      [
-        "firstName",
-        "email",
-        "lastName",
-        "password",
-        "confirmPassword",
-        "phoneNumber",
-        "role",
-        "barangay",
-      ],
-      req.body,
-      res
-    );
-
     validateTypes(VALID_STAFF_ROLE, role);
 
     // Required field validation
@@ -469,8 +548,6 @@ export const updateStaff = async (req, res, next) => {
         .json({ success: false, message: "Barangay is required" });
     }
 
-    session.startTransaction();
-
     const staff = await User.findById(staffId);
     if (!staff)
       return res.status(400).json({
@@ -478,28 +555,26 @@ export const updateStaff = async (req, res, next) => {
         message: "Staff does not exist",
       });
 
-    if (password) {
-      if (!password || password.trim() === "") {
-        return res
-          .status(400)
-          .json({ success: false, message: "password is required" });
-      }
+    // if (password) {
+    //   if (!password || password.trim() === "") {
+    //     return res
+    //       .status(400)
+    //       .json({ success: false, message: "password is required" });
+    //   }
 
-      if (password.trim() != confirmPassword.trim())
-        return res.status(400).json({
-          success: false,
-          message: "Passwords does not match. Please try again.",
-        });
+    //   if (password.trim() != confirmPassword.trim())
+    //     return res.status(400).json({
+    //       success: false,
+    //       message: "Passwords does not match. Please try again.",
+    //     });
 
-      if (await staff.comparePassword(password)) {
-        return res.status(400).json({
-          success: false,
-          message: "Cannot use previous password",
-        });
-      } else {
-        isPasswordChanged = true;
-      }
-    }
+    //   if (await staff.comparePassword(password)) {
+    //     return res.status(400).json({
+    //       success: false,
+    //       message: "Cannot use previous password",
+    //     });
+    //   }
+    // }
 
     const updatedData = {
       firstName,
@@ -590,4 +665,3 @@ export const signOut = async (req, res, next) => {
     next(error);
   }
 };
-

@@ -40,6 +40,7 @@ export default function CreateStaffPage() {
 
   const queryClient = useQueryClient();
   const router = useRouter();
+
   const { mutate: createStaff, isPending } = useMutation({
     mutationFn: async (data: any) => {
       const res = await axiosInstance.post("/auth/create-staff", data);
@@ -63,11 +64,7 @@ export default function CreateStaffPage() {
     },
   });
 
-  const {
-    data: barangays,
-    isPending: isBarangayPending,
-    isError: isBarangayError,
-  } = useQuery({
+  const { data: barangays } = useQuery({
     queryKey: ["barangay"],
     queryFn: async () => {
       const res = await axiosInstance.get(`/barangay/get-barangays`);
@@ -77,6 +74,8 @@ export default function CreateStaffPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    console.log(formData)
 
     createStaff(formData);
   };

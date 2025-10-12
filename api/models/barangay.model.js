@@ -5,14 +5,14 @@ const BarangayModelSchema = new mongoose.Schema(
     name: { type: String, required: true },
     municipality: { type: String, required: true },
     province: { type: String, required: true },
-    // captainsName: String,
-    // contactNumber: String,
+
     beneficiaries: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Beneficiary",
       },
     ],
+
     staffs: [
       {
         type: mongoose.Schema.Types.ObjectId,

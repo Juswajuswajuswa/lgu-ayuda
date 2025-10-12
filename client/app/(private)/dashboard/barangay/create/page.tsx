@@ -29,7 +29,7 @@ export default function CreateBarangayPage() {
   const router = useRouter();
   const { mutate: createBarangay, isPending } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.post("/auth/add-barangay", data);
+      const res = await axiosInstance.post("/barangay/add-barangay", data);
       return res.data;
     },
     onSuccess: (data) => {
