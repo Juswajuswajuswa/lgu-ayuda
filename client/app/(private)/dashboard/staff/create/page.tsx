@@ -62,7 +62,7 @@ export default function CreateStaffPage() {
   });
 
   const {
-    data: barangay,
+    data: barangays,
     isPending: isBarangayPending,
     isError: isBarangayError,
   } = useQuery({
@@ -72,8 +72,6 @@ export default function CreateStaffPage() {
       return res.data;
     },
   });
-
-  console.log(barangay);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,9 +133,13 @@ export default function CreateStaffPage() {
                     <SelectValue placeholder="Please select a barangay" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="validator">Validator</SelectItem>
-                    <SelectItem value="encoder">Encoder</SelectItem>
-                    <SelectItem value="distributer">Distributer</SelectItem>
+                    {barangays?.barangays &&
+                      barangays?.barangays.length > 0 &&
+                      barangays?.barangays.map((barangay) => (
+                        <SelectItem key={barangay._id} value={barangay._id}>
+                          {barangay.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
