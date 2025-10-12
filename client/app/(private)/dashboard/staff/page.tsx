@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -11,6 +13,8 @@ import { PlusIcon } from "lucide-react";
 import { columns, Staff } from "./columns";
 import { DataTable } from "./data-table";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios";
 
 async function getData(): Promise<Staff[]> {
   return [
@@ -23,8 +27,18 @@ async function getData(): Promise<Staff[]> {
   ];
 }
 
-export default async function StaffPage() {
-  const data = await getData();
+export default function StaffPage() {
+  // const data = await getData();
+
+  const { data: staffs } = useQuery({
+    queryKey: ["staffs"],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/user/get-users`);
+      return res.data;
+    },
+  });
+
+  console.log(staffs);
 
   return (
     <>
@@ -43,7 +57,7 @@ export default async function StaffPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={data} />
+          {/* <DataTable columns={columns} data={data} /> */}
         </CardContent>
       </Card>
     </>
