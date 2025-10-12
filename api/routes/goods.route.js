@@ -26,6 +26,8 @@ router.put(
   updateGoods
 );
 
+router.get("/get-good/:goodsId");
+
 router.delete(
   `/delete-goods/:goodsId`,
   requireAuth,

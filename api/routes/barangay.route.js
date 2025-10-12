@@ -25,6 +25,6 @@ router.put(
   requireRole("admin"),
   updateBarangay
 );
-router.get(`/single-barangay/:barangayId`, requireAuth, getSingleBarangay)
+router.get(`/single-barangay/:barangayId`, requireAuth, getSingleBarangay);
 
 export default router;

@@ -129,7 +129,7 @@ export const updateAyuda = async (req, res, next) => {
     }
   }
 
-  requiredInputs(["name", "description", "type", "budget"], req.body);
+  requiredInputs(["name", "description", "type", "budget"], req.body, res);
   validateTypes(["cash", "goods"], type);
 
   try {

@@ -22,7 +22,7 @@ import {
 import Logo from "../public/Logo.png";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
@@ -51,7 +51,9 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
     },
     onSuccess: (data) => {
       toast.success(data.message);
-      router.push(`/onboarding?email=${encodeURIComponent(decodedEmail)}`);
+      if (searchParams?.has("board")) {
+        router.push(`/onboarding?email=${encodeURIComponent(decodedEmail)}`);
+      }
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Invalid OTP");
