@@ -9,12 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
+import { Link, MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Barangay = {
-  id: string;
+  _id: string;
   name: string;
   municipality: string;
   province: string;
@@ -46,15 +46,24 @@ export const columns: ColumnDef<Barangay>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>
-                {" "}
-                <PencilIcon className="w-4 h-4" />
-                Edit
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/barangay/edit/${row.original._id}`}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  Edit
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
-                <TrashIcon className="w-4 h-4" />
-                Delete
+              <DropdownMenuItem variant="destructive" asChild>
+                <Link
+                  href={`/dashboard/barangay/delete/${row.original._id}`}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  Delete
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

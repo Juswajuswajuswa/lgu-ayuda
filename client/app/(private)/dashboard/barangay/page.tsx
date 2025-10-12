@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -6,32 +8,26 @@ import {
   CardDescription,
   CardAction,
 } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { Loader2, PlusIcon } from "lucide-react";
 import { columns } from "./columns";
 import { DataTable } from "../staff/data-table";
 import Link from "next/link";
+import axiosInstance from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
 
-export type Barangay = {
-  id: string;
-  name: string;
-  municipality: string;
-  province: string;
-};
-
-async function getData(): Promise<Barangay[]> {
-  return [
-    {
-      id: "728ed52f",
-      name: "Lower Bicutan",
-      municipality: "Taguig",
-      province: "Metro Manila",
+export default function BarangayPage() {
+  const {
+    data: barangays,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["barangays"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/barangay/get-barangays");
+      return res.data;
     },
-  ];
-}
-
-export default async function BarangayPage() {
-  const data = await getData();
+  });
 
   return (
     <>
@@ -50,7 +46,18 @@ export default async function BarangayPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={data} />
+          {isPending ? (
+            <div className="h-24 flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Loading...</span>
+            </div>
+          ) : isError ? (
+            <div className="h-24 flex items-center justify-center text-destructive">
+              Error loading barangay data.
+            </div>
+          ) : (
+            <DataTable columns={columns} data={barangays.barangays || []} />
+          )}
         </CardContent>
       </Card>
     </>
