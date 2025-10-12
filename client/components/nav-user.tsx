@@ -46,7 +46,6 @@ export function NavUser({
       await axiosInstance.post("/auth/signout");
     },
     onSuccess: () => {
-      router.push("/login");
       toast.success("Logged out successfully");
     },
     onError: (error: any) => {
