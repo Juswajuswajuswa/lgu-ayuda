@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeftIcon, EyeIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -21,12 +21,31 @@ import {
   SelectContent,
 } from "@/components/ui/select";
 import axiosInstance from "@/lib/axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-export default function CreateStaffPage() {
+import { useParams } from "next/navigation";
+export default function EditStaffPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const params = useParams();
+  const { id } = params;
+
+  const {
+    data: staff,
+    isPending: isStaffPending,
+    isError: isStaffError,
+  } = useQuery({
+    queryKey: ["staff", id],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/user/get-user/${id}`);
+      return res.data.user;
+    },
+  });
+
+  console.log(staff);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -38,18 +57,31 @@ export default function CreateStaffPage() {
     email: "",
   });
 
-  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (staff) {
+      setFormData({
+        firstName: staff.firstName || "",
+        lastName: staff.lastName || "",
+        role: staff.role || "",
+        barangay: staff.barangay?._id || staff.barangay || "",
+        password: "",
+        confirmPassword: "",
+        phoneNumber: staff.phoneNumber || "",
+        email: staff.email || "",
+      });
+    }
+  }, [staff]);
+
   const router = useRouter();
 
-  const { mutate: createStaff, isPending } = useMutation({
+  const { mutate: updateStaff, isPending } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.post("/auth/create-staff", data);
+      const res = await axiosInstance.post(`/auth/update-staff/${id}`, data);
       return res.data;
     },
     onSuccess: (data) => {
       toast.success(data.message);
       router.push("/dashboard/staff");
-      queryClient.invalidateQueries({ queryKey: ["staffs"] });
     },
     onError: (error: any) => {
       const serverError = error?.response?.data;
@@ -64,7 +96,11 @@ export default function CreateStaffPage() {
     },
   });
 
-  const { data: barangays } = useQuery({
+  const {
+    data: barangays,
+    isPending: isBarangayPending,
+    isError: isBarangayError,
+  } = useQuery({
     queryKey: ["barangay"],
     queryFn: async () => {
       const res = await axiosInstance.get(`/barangay/get-barangays`);
@@ -75,9 +111,7 @@ export default function CreateStaffPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log(formData)
-
-    createStaff(formData);
+    updateStaff(formData);
   };
   return (
     <>
@@ -91,9 +125,9 @@ export default function CreateStaffPage() {
               <ArrowLeftIcon className="w-4 h-4" />
               Back
             </Link>
-            <CardTitle>Create Staff</CardTitle>
+            <CardTitle>Edit Staff</CardTitle>
           </div>
-          <CardDescription>Create a new staff member</CardDescription>
+          <CardDescription>Edit a staff member</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,45 +221,6 @@ export default function CreateStaffPage() {
                     setFormData({ ...formData, email: e.target.value })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex gap-6 w-full">
-              <div className="w-full space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                  />
-                  <EyeIcon
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setShowPassword(!showPassword)}
-                  />
-                </div>
-              </div>
-              <div className="w-full space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
-                  />
-                  <EyeIcon
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  />
-                </div>
               </div>
             </div>
             <div className="mt-5">
