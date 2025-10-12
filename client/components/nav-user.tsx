@@ -47,6 +47,7 @@ export function NavUser({
     },
     onSuccess: () => {
       toast.success("Logged out successfully");
+      router.push("/login");
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);
