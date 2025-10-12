@@ -105,12 +105,10 @@ export const sendForgetPasswordOtp = async (req, res, next) => {
         const timeLeftMinutes = Math.ceil(
           (cooldownMs - timeSinceLastAttempt) / (1000 * 60)
         );
-        return next(
-          handleMakeError(
-            429,
-            `Please wait ${timeLeftMinutes} minute(s) before requesting another reset.`
-          )
-        );
+        return res.status(400).json({
+          success: true,
+          message: `Please wait ${timeLeftMinutes} minute(s) before requesting another reset.`,
+        });
       }
     }
 
@@ -128,12 +126,7 @@ export const sendForgetPasswordOtp = async (req, res, next) => {
     const validUser = await User.findOne({ email });
     if (!validUser) {
       // Return a generic message to prevent email enumeration
-      return next(
-        handleMakeError(
-          400,
-          "If this email exists, a recovery link has been sent."
-        )
-      );
+      return;
     }
 
     await sendEmail(
@@ -542,10 +535,12 @@ export const updateStaff = async (req, res, next) => {
       }
     }
 
-    if (!barangay) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Barangay is required" });
+    if (barangay) {
+      if (!barangay) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Barangay is required" });
+      }
     }
 
     const staff = await User.findById(staffId);
