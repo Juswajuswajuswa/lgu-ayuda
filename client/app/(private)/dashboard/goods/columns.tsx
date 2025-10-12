@@ -14,25 +14,27 @@ import { useRouter } from "next/navigation";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Barangay = {
+export type Goods = {
   _id: string;
-  name: string;
-  municipality: string;
-  province: string;
+  product: {
+    name: string;
+    details: string;
+  };
+  quantity: number;
 };
 
-export const columns: ColumnDef<Barangay>[] = [
+export const columns: ColumnDef<Goods>[] = [
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "product.name",
+    header: "Product Name",
   },
   {
-    accessorKey: "municipality",
-    header: "Municipality",
+    accessorKey: "product.details",
+    header: "Product Details",
   },
   {
-    accessorKey: "province",
-    header: "Province",
+    accessorKey: "quantity",
+    header: "Quantity",
   },
   {
     accessorKey: "actions",
@@ -50,7 +52,7 @@ export const columns: ColumnDef<Barangay>[] = [
             <DropdownMenuContent>
               <DropdownMenuItem
                 onClick={() =>
-                  router.push(`/dashboard/barangay/edit/${row.original._id}`)
+                  router.push(`/dashboard/goods/edit/${row.original._id}`)
                 }
               >
                 <PencilIcon className="w-4 h-4" />
@@ -60,7 +62,7 @@ export const columns: ColumnDef<Barangay>[] = [
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() =>
-                  router.push(`/dashboard/barangay/delete/${row.original._id}`)
+                  router.push(`/dashboard/goods/delete/${row.original._id}`)
                 }
               >
                 <TrashIcon className="w-4 h-4" />
