@@ -21,7 +21,7 @@ import {
   SelectContent,
 } from "@/components/ui/select";
 import axiosInstance from "@/lib/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 export default function CreateStaffPage() {
@@ -58,6 +58,18 @@ export default function CreateStaffPage() {
       } else {
         toast.error(serverError?.message || "Something went wrong");
       }
+    },
+  });
+
+  const {
+    data: barangays,
+    isPending: isBarangayPending,
+    isError: isBarangayError,
+  } = useQuery({
+    queryKey: ["barangay"],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/barangay/get-barangays`);
+      return res.data;
     },
   });
 
@@ -121,9 +133,13 @@ export default function CreateStaffPage() {
                     <SelectValue placeholder="Please select a barangay" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="validator">Validator</SelectItem>
-                    <SelectItem value="encoder">Encoder</SelectItem>
-                    <SelectItem value="distributer">Distributer</SelectItem>
+                    {barangays?.barangays &&
+                      barangays?.barangays.length > 0 &&
+                      barangays?.barangays.map((barangay) => (
+                        <SelectItem key={barangay._id} value={barangay._id}>
+                          {barangay.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
