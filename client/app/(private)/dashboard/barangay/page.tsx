@@ -6,10 +6,11 @@ import {
   CardDescription,
   CardAction,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { columns } from "./columns";
 import { DataTable } from "../staff/data-table";
+import Link from "next/link";
 
 export type Barangay = {
   id: string;
@@ -39,10 +40,13 @@ export default async function BarangayPage() {
           <CardTitle>Barangay</CardTitle>
           <CardDescription>List of all barangay.</CardDescription>
           <CardAction>
-            <Button>
+            <Link
+              href="/dashboard/barangay/create"
+              className={buttonVariants({ variant: "default" })}
+            >
               <PlusIcon />
               Add Barangay
-            </Button>
+            </Link>
           </CardAction>
         </CardHeader>
         <CardContent>

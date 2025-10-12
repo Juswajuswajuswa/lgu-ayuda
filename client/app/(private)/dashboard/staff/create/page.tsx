@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeftIcon, EyeIcon } from "lucide-react";
+import { ArrowLeftIcon, EyeIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -213,7 +213,14 @@ export default function CreateStaffPage() {
             </div>
             <div className="mt-5">
               <Button type="submit" className="w-full" disabled={isPending}>
-                Submit
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </div>
           </form>
