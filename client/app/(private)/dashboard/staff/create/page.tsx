@@ -135,7 +135,7 @@ export default function CreateStaffPage() {
                   <SelectContent>
                     {barangays?.barangays &&
                       barangays?.barangays.length > 0 &&
-                      barangays?.barangays.map((barangay) => (
+                      barangays?.barangays.map((barangay: any) => (
                         <SelectItem key={barangay._id} value={barangay._id}>
                           {barangay.name}
                         </SelectItem>
