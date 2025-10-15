@@ -21,12 +21,11 @@ import {
 } from "@/components/ui/input-otp";
 import Logo from "../public/Logo.png";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import { useSearchParams, useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useVerifyOtpMutation } from "@/hooks/query/auth/useVerifyOtpMutation";
+import { useResendOtpMutation } from "@/hooks/query/auth/useResendOtpMutation";
 
 export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [otp, setOtp] = useState("");
@@ -34,47 +33,18 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
   const router = useRouter();
   const email = searchParams.get("email");
   const decodedEmail = decodeURIComponent(email || "");
+  const isForgotPassword = searchParams.has("forgot-password");
 
-  const { mutate: verifyOtp, isPending } = useMutation({
-    mutationFn: async ({
-      decodedEmail,
-      otp,
-    }: {
-      decodedEmail: string;
-      otp: string;
-    }) => {
-      const res = await axiosInstance.post(`/auth/verify-token`, {
-        email: decodedEmail,
-        otp,
-      });
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      if (searchParams?.has("board")) {
-        router.push(`/onboarding?email=${encodeURIComponent(decodedEmail)}`);
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Invalid OTP");
-    },
+  const { mutate: verifyOtp, isPending } = useVerifyOtpMutation((email) => {
+    if (isForgotPassword) {
+      router.push(`/password-reset?email=${encodeURIComponent(email)}`);
+    } else {
+      router.push(`/onboarding?email=${encodeURIComponent(email)}`);
+    }
   });
 
-  const { mutate: resendOtp, isPending: isResendingOtp } = useMutation({
-    mutationFn: async ({ decodedEmail }: { decodedEmail: string }) => {
-      const res = await axiosInstance.post(`/auth/resend-otp`, {
-        email: decodedEmail,
-      });
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to resend OTP");
-      console.log(error);
-    },
-  });
+  const { mutate: resendOtp, isPending: isResendingOtp } =
+    useResendOtpMutation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,12 +56,12 @@ export function OTPForm({ ...props }: React.ComponentProps<typeof Card>) {
       toast.error("Please enter a complete 6-digit OTP");
       return;
     }
-    verifyOtp({ decodedEmail, otp });
+    verifyOtp({ email: decodedEmail, otp });
   };
 
   const handleResend = (e: React.FormEvent) => {
     e.preventDefault();
-    resendOtp({ decodedEmail });
+    resendOtp({ email: decodedEmail });
   };
 
   if (!email) {

@@ -4,38 +4,20 @@ import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axiosInstance from "@/lib/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useSendForgotPasswordMutation } from "@/hooks/query/auth/useSendForgotPasswordMutation";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const router = useRouter();
 
-  const { mutate: sendForgetPasswordMutation, isPending } = useMutation({
-    mutationFn: async ({ email }: { email: string }) => {
-      const res = await axiosInstance.post(`/auth/send-forgetpassword`, {
-        email: email,
-      });
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      router.push(`/verify-otp?board&email=${encodeURIComponent(email)}`);
-    },
-    onError: (err) => {
-      // toast.error(err?.response?.data?.message || "something went wron");
-      console.log(err);
-    },
-  });
+  const { mutate: sendForgetPasswordMutation, isPending } =
+    useSendForgotPasswordMutation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    sendForgetPasswordMutation({ email: email });
+    sendForgetPasswordMutation({ email });
   };
 
   return (
@@ -74,8 +56,15 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Send Verification Code
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <span>Send Verification Code</span>
+              )}
             </Button>
           </div>
 
@@ -89,7 +78,12 @@ export default function ForgotPasswordPage() {
         <div className="p-3">
           <p className="text-accent-foreground text-center text-sm">
             Remembered your password?
-            <Button asChild variant="link" className="px-2">
+            <Button
+              asChild
+              variant="link"
+              className="px-2"
+              disabled={isPending}
+            >
               <Link href="/login">Log in</Link>
             </Button>
           </p>

@@ -47,6 +47,18 @@ export const createAdminRequestSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
 });
 
+// Forgot password request
+export const forgotPasswordRequestSchema = z.object({
+  email: emailSchema,
+});
+
+// Password reset request
+export const passwordResetRequestSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  confirmPassword: passwordSchema,
+});
+
 // Type exports
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
@@ -54,3 +66,5 @@ export type CheckAdminResponse = z.infer<typeof checkAdminResponseSchema>;
 export type OtpRequest = z.infer<typeof otpRequestSchema>;
 export type VerifyOtpRequest = z.infer<typeof verifyOtpRequestSchema>;
 export type CreateAdminRequest = z.infer<typeof createAdminRequestSchema>;
+export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>;
+export type PasswordResetRequest = z.infer<typeof passwordResetRequestSchema>;
