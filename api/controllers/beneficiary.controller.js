@@ -92,6 +92,52 @@ export const registerBeneficiary = async (req, res, next) => {
   }
 };
 
+export const archiveBeneficiary = async (req, res, next) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const { isArchived } = req.body;
+
+    const beneficiary = await Beneficiary.findByIdAndUpdate(
+      beneficiaryId,
+      {
+        $set: {
+          isArchived: isArchived,
+        },
+      },
+      { new: true }
+    );
+
+    if (!beneficiary)
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid id or no beneficiary" });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully updated to archive",
+      data: beneficiary,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSingleBeneficiary = async (req, res, next) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const beneficiary = await Beneficiary.findById(beneficiaryId);
+    if (!beneficiary)
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid id or no beneficiary" });
+    res
+      .status(200)
+      .json({ success: true, message: "successfully fetched", beneficiary });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // export const scanBeneficiaryId = async (req, res, next) => {
 //   const { beneficiaryId } = req.params;
 
@@ -149,7 +195,7 @@ export const registerBeneficiary = async (req, res, next) => {
 
 export const getBeneficiaries = async (req, res, next) => {
   try {
-    const beneficiaries = await Beneficiary.find()
+    const beneficiaries = await Beneficiary.find({ isArchived: true })
       .populate({
         path: "address.barangay",
         select: "name municipality province",

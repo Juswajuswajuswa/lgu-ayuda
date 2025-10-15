@@ -1,6 +1,8 @@
 import express from "express";
 import {
+  archiveBeneficiary,
   getBeneficiaries,
+  getSingleBeneficiary,
   registerBeneficiary,
   //   scanBeneficiaryId,
   updateBeneficiary,
@@ -26,6 +28,20 @@ router.put(
   requireAuth,
   requireRole("admin", "encoder"),
   updateBeneficiary
+);
+
+router.get(
+  `/get-beneficary/:beneficiaryId`,
+  requireAuth,
+  requireRole("admin", "encoder"),
+  getSingleBeneficiary
+);
+
+router.put(
+  "/archive-beneficiary/:beneficiaryId",
+  requireAuth,
+  requireRole("encoder", "admin"),
+  archiveBeneficiary
 );
 
 export default router;

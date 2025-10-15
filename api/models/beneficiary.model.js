@@ -48,6 +48,11 @@ const BeneficiaryModelSchema = new mongoose.Schema(
       enum: ["claimed", "unclaimed"],
     },
 
+    isArchived: {
+      type: Boolean,
+      default: true,
+    },
+
     // qrCode: {D
     //   type: String,
     // },
