@@ -47,10 +47,12 @@ export const beneficiaryService = {
   },
 
   /**
-   * Archive beneficiary
+   * Archive beneficiary (remove from active list)
    */
   delete: async (id: string): Promise<ApiResponse> => {
-    return apiClient.put(`/beneficiary/archive-beneficiary/${id}`);
+    return apiClient.put(`/beneficiary/archive-beneficiary/${id}`, {
+      isArchived: false,
+    });
   },
 };
 

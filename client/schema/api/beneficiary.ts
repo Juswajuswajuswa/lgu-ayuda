@@ -1,6 +1,14 @@
 import { z } from "zod";
 import { mongoIdSchema, timestampSchema } from "../common/base";
 
+// Populated Barangay (when fetched from API)
+export const populatedBarangaySchema = z.object({
+  _id: mongoIdSchema,
+  name: z.string(),
+  municipality: z.string(),
+  province: z.string(),
+});
+
 // Beneficiary
 export const beneficiarySchema = z.object({
   _id: mongoIdSchema,
@@ -8,10 +16,11 @@ export const beneficiarySchema = z.object({
   dob: z.coerce.date,
   gender: z.enum(["male", "female", "other"]),
   phoneNumber: z.string().min(1, "Phone number is required"),
+  validId: z.string(),
   address: z.object({
     municipality: z.string().min(1, "Municipality is required"),
     province: z.string().min(1, "Province is required"),
-    barangay: z.string().min(1, "Barangay is required"),
+    barangay: z.union([z.string(), populatedBarangaySchema]),
   }),
   ...timestampSchema.shape,
 });

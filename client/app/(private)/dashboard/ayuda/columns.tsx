@@ -11,6 +11,7 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { Ayuda } from "@/schema/api/ayuda";
+import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef<Ayuda>[] = [
   {
@@ -26,10 +27,6 @@ export const columns: ColumnDef<Ayuda>[] = [
     header: "Budget",
   },
   {
-    accessorKey: "barangay",
-    header: "Barangay",
-  },
-  {
     accessorKey: "description",
     header: "Description",
   },
@@ -37,6 +34,7 @@ export const columns: ColumnDef<Ayuda>[] = [
     accessorKey: "actions",
     header: "Actions",
     cell: ({ row }) => {
+      const router = useRouter();
       return (
         <>
           <DropdownMenu>
@@ -46,13 +44,22 @@ export const columns: ColumnDef<Ayuda>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/dashboard/ayuda/edit/${row.original._id}`)
+                }
+              >
                 {" "}
                 <PencilIcon className="w-4 h-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() =>
+                  router.push(`/dashboard/ayuda/delete/${row.original._id}`)
+                }
+              >
                 <TrashIcon className="w-4 h-4" />
                 Delete
               </DropdownMenuItem>

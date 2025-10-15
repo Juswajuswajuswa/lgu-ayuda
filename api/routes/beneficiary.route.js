@@ -31,7 +31,7 @@ router.put(
 );
 
 router.get(
-  `/get-beneficary/:beneficiaryId`,
+  `/get-beneficiary/:beneficiaryId`,
   requireAuth,
   requireRole("admin", "encoder"),
   getSingleBeneficiary

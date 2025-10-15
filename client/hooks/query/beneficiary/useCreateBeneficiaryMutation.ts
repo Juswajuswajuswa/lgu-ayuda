@@ -6,6 +6,18 @@ import type { CreateBeneficiaryRequest } from "@/schema/api/beneficiary";
 import beneficiaryService from "@/services/api/beneficiary.service";
 
 /**
+ * Convert File to base64 string
+ */
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+/**
  * Hook to create new beneficiary
  */
 export const useCreateBeneficiaryMutation = () => {
@@ -13,8 +25,14 @@ export const useCreateBeneficiaryMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateBeneficiaryRequest) =>
-      beneficiaryService.create(data),
+    mutationFn: async (data: any) => {
+      // Convert File to base64 if validId is a File
+      if (data.validId instanceof File) {
+        const base64 = await fileToBase64(data.validId);
+        data = { ...data, validId: base64 };
+      }
+      return beneficiaryService.create(data as CreateBeneficiaryRequest);
+    },
     onSuccess: (response) => {
       toast.success(response.message || "Beneficiary created successfully");
 

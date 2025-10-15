@@ -24,6 +24,12 @@ interface FormDatePickerProps {
   disabled?: boolean;
   id?: string;
   name?: string;
+  /** earliest year selectable (defaults to currentYear - 120) */
+  minYear?: number;
+  /** latest year selectable (defaults to currentYear) */
+  maxYear?: number;
+  /** when true, disables all future dates */
+  disableFuture?: boolean;
 }
 
 /**
@@ -40,8 +46,14 @@ export const FormDatePicker = ({
   disabled,
   id,
   name,
+  minYear,
+  maxYear,
+  disableFuture = true,
 }: FormDatePickerProps) => {
   const fieldId = id || name;
+  const today = new Date();
+  const computedMaxYear = maxYear ?? today.getFullYear();
+  const computedMinYear = minYear ?? computedMaxYear - 120; // sensible default for DOB
 
   return (
     <div className="w-full space-y-2">
@@ -78,6 +90,11 @@ export const FormDatePicker = ({
             mode="single"
             selected={value}
             onSelect={onChange}
+            // Show separate month and year dropdowns for better UX
+            captionLayout="dropdown"
+            fromYear={computedMinYear}
+            toYear={computedMaxYear}
+            disabled={(date) => (disableFuture ? date > today : false)}
             initialFocus
           />
         </PopoverContent>

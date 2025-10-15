@@ -10,21 +10,30 @@ import {
 import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  beneficiaryFormSchema,
-  type BeneficiaryFormData,
+  beneficiaryEditFormSchema,
+  type BeneficiaryEditFormData,
 } from "@/schema/forms/beneficiary";
+import { useBeneficiary } from "@/hooks/query/beneficiary/useBeneficiary";
+import { useUpdateBeneficiaryMutation } from "@/hooks/query/beneficiary/useUpdateBeneficiaryMutation";
 import { FormField } from "@/components/forms/common/FormField";
 import { FormDatePicker } from "@/components/forms/common/FormDatePicker";
 import { FormRadioGroup } from "@/components/forms/common/FormRadioGroup";
-import { FormFileUpload } from "@/components/forms/common/FormFileUpload";
 import { FormSelect } from "@/components/forms/common/FormSelect";
-import useCreateBeneficiaryMutation from "@/hooks/query/beneficiary/useCreateBeneficiaryMutation";
 import useBarangays from "@/hooks/query/barangay/useBarangays";
 
-export default function CreateBeneficiaryPage() {
+export default function EditBeneficiaryPage() {
+  const params = useParams();
+  const { id } = params as { id: string };
+
+  const { data: response, isPending: isLoadingBeneficiary } =
+    useBeneficiary(id);
+  const beneficiary = response?.data || response?.beneficiary;
+
   const { data: barangays } = useBarangays();
 
   const {
@@ -33,15 +42,14 @@ export default function CreateBeneficiaryPage() {
     control,
     setValue,
     formState: { errors },
-  } = useForm<BeneficiaryFormData>({
-    resolver: zodResolver(beneficiaryFormSchema),
+    reset,
+  } = useForm<BeneficiaryEditFormData>({
+    resolver: zodResolver(beneficiaryEditFormSchema),
     defaultValues: {
       fullName: "",
       dob: undefined,
       gender: "male",
       phoneNumber: "",
-      validId: undefined,
-      status: "unclaimed",
       address: {
         municipality: "",
         province: "",
@@ -50,12 +58,40 @@ export default function CreateBeneficiaryPage() {
     },
   });
 
-  const { mutate: createBeneficiary, isPending } =
-    useCreateBeneficiaryMutation();
+  const { mutate: updateBeneficiary, isPending } =
+    useUpdateBeneficiaryMutation(id);
 
-  const onSubmit = (data: BeneficiaryFormData) => {
-    createBeneficiary(data);
-  };
+  // Update form when beneficiary data loads
+  useEffect(() => {
+    if (beneficiary) {
+      const barangayObj =
+        typeof beneficiary.address?.barangay === "object"
+          ? beneficiary.address.barangay
+          : null;
+
+      const barangayId = (barangayObj?._id ||
+        beneficiary.address?.barangay ||
+        "") as string;
+
+      reset({
+        fullName: beneficiary.fullName || "",
+        dob: beneficiary.dob
+          ? new Date(beneficiary.dob as string | Date)
+          : undefined,
+        gender: beneficiary.gender || "male",
+        phoneNumber: beneficiary.phoneNumber || "",
+        address: {
+          municipality:
+            barangayObj?.municipality ||
+            beneficiary.address?.municipality ||
+            "",
+          province:
+            barangayObj?.province || beneficiary.address?.province || "",
+          barangay: barangayId || "",
+        },
+      });
+    }
+  }, [beneficiary, reset]);
 
   const handleBarangayChange = (barangayId: string) => {
     const selectedBarangay = barangays?.barangays?.find(
@@ -68,6 +104,21 @@ export default function CreateBeneficiaryPage() {
     }
   };
 
+  const onSubmit = (data: BeneficiaryEditFormData) => {
+    updateBeneficiary(data);
+  };
+
+  if (isLoadingBeneficiary) {
+    return (
+      <Card>
+        <CardContent className="h-48 flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Loading beneficiary data...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -79,9 +130,11 @@ export default function CreateBeneficiaryPage() {
             <ArrowLeftIcon className="w-4 h-4" />
             Back
           </Link>
-          <CardTitle>Create Beneficiary</CardTitle>
+          <CardTitle>Edit Beneficiary</CardTitle>
         </div>
-        <CardDescription>Create a new beneficiary</CardDescription>
+        <CardDescription>
+          Update beneficiary information (Valid ID cannot be changed)
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -135,22 +188,6 @@ export default function CreateBeneficiaryPage() {
           />
 
           <Controller
-            name="validId"
-            control={control}
-            render={({ field }) => (
-              <FormFileUpload
-                label="Valid ID"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.validId as any}
-                accept="image/jpeg,image/jpg,image/png,image/gif"
-                helperText="Upload a valid government-issued ID (JPEG, PNG, or GIF, max 5MB)"
-                required
-              />
-            )}
-          />
-
-          <Controller
             name="address.barangay"
             control={control}
             render={({ field }) => (
@@ -195,10 +232,10 @@ export default function CreateBeneficiaryPage() {
             {isPending ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Creating...
+                Updating...
               </>
             ) : (
-              "Create Beneficiary"
+              "Update Beneficiary"
             )}
           </Button>
         </form>
