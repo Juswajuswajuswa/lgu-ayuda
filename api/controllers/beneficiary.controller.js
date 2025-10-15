@@ -8,7 +8,7 @@ import { validateBeneficiary } from "../validations/beneficiary.validation.js";
 export const registerBeneficiary = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  const { fullName, dob, gender, phoneNumber, address } = req.body;
+  const { fullName, dob, gender, phoneNumber, address, validId } = req.body;
 
   try {
     // Use validation function instead of requiredInputs
@@ -17,7 +17,8 @@ export const registerBeneficiary = async (req, res, next) => {
       dob,
       gender,
       phoneNumber,
-      address
+      address,
+      validId
     );
 
     if (!validation.isValid) {
@@ -39,7 +40,7 @@ export const registerBeneficiary = async (req, res, next) => {
       if (!isValidObjectId(barangay))
         throw new AppError(400, "Invalid Barangay ID");
 
-      beneficiaryAddress = { municipality, city, province };
+      beneficiaryAddress = { municipality, barangay, province };
     }
 
     const beneficiary = new Beneficiary({
@@ -48,6 +49,7 @@ export const registerBeneficiary = async (req, res, next) => {
       gender,
       phoneNumber,
       address: beneficiaryAddress,
+      validId,
     });
 
     // const scanUrl = `http://192.168.100.145:5000/api/beneficiary/${beneficiary._id}/scan`;
@@ -125,7 +127,10 @@ export const archiveBeneficiary = async (req, res, next) => {
 export const getSingleBeneficiary = async (req, res, next) => {
   try {
     const { beneficiaryId } = req.params;
-    const beneficiary = await Beneficiary.findById(beneficiaryId);
+    const beneficiary = await Beneficiary.findById(beneficiaryId).populate({
+      path: "address.barangay",
+      select: "name municipality province",
+    });
     if (!beneficiary)
       return res
         .status(400)
@@ -208,7 +213,7 @@ export const getBeneficiaries = async (req, res, next) => {
         beneficiaries: [],
       });
 
-    res.status(200).json({ sucess: true, data: beneficiaries });
+    res.status(200).json({ success: true, beneficiaries: beneficiaries });
   } catch (error) {
     next(error);
   }
@@ -223,12 +228,14 @@ export const updateBeneficiary = async (req, res, next) => {
 
   try {
     // Use validation function instead of requiredInputs
+    // Note: validId is not included here as we don't allow updating it
     const validation = await validateBeneficiary(
       fullName,
       dob,
       gender,
       phoneNumber,
       address,
+      null, // validId - not allowed to update
       beneficiaryId
     );
 

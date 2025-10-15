@@ -18,7 +18,7 @@ import { useAyudas } from "@/hooks/query/ayuda/useAyudas";
 export default function AyudaPage() {
   const { data: response, isPending, isError } = useAyudas();
 
-  const ayudas = response?.ayudas || [];
+  const ayudas = response?.data || [];
 
   return (
     <>

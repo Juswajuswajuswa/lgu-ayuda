@@ -27,12 +27,10 @@ const BeneficiaryModelSchema = new mongoose.Schema(
     //   default: "registered",
     // },
 
-    validId: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    validId: {
+      type: String,
+      required: true,
+    },
 
     claimCode: {
       type: String,
@@ -46,11 +44,12 @@ const BeneficiaryModelSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["claimed", "unclaimed"],
+      default: "unclaimed",
     },
 
     isArchived: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     // qrCode: {D

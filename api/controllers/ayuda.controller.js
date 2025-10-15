@@ -9,7 +9,7 @@ export const registerAyuda = async (req, res, next) => {
   const { name, description, amount, goods, type, budget } = req.body;
 
   if (type === "cash") {
-    if (!amount || amount !== 0)
+    if (!amount || amount === 0)
       return res
         .status(400)
         .json({ success: false, message: "Amount is required for cash type" });
@@ -37,14 +37,14 @@ export const registerAyuda = async (req, res, next) => {
         .json({ success: false, message: "Goods are required" });
     }
 
-    if (goods.length >= 5) {
+    if (goods.length > 5) {
       return res
         .status(400)
-        .json({ success: false, message: "goods must not greater than 5" });
+        .json({ success: false, message: "goods must not be greater than 5" });
     }
   }
 
-  requiredInputs(["name", "description", "type", "budget"], req.body);
+  requiredInputs(["name", "type", "budget"], req.body, res);
   validateTypes(VALID_AYUDA_TYPES, type);
 
   try {
@@ -71,7 +71,7 @@ export const registerAyuda = async (req, res, next) => {
 
 export const getAyudas = async (req, res, next) => {
   try {
-    const ayudas = await Ayuda.find().sort({ createdAt: -1 });
+    const ayudas = await Ayuda.find().populate("goods").sort({ createdAt: -1 });
     if (!ayudas && ayudas.length === 0)
       return res.json({ message: "Empty ayuda", ayudas: [] });
     res.status(200).json({ success: true, data: ayudas });
@@ -83,7 +83,7 @@ export const getAyudas = async (req, res, next) => {
 export const getAyuda = async (req, res, next) => {
   const { ayudaId } = req.params;
   try {
-    const ayuda = await Ayuda.findById(ayudaId);
+    const ayuda = await Ayuda.findById(ayudaId).populate("goods");
     if (!ayuda) throw new AppError(400, "Invalid or no found ayuda ID");
     res.status(200).json({ success: true, data: ayuda });
   } catch (error) {
@@ -110,10 +110,10 @@ export const deleteAyuda = async (req, res, next) => {
 
 export const updateAyuda = async (req, res, next) => {
   const { ayudaId } = req.params;
-  const { name, description, amount, type, budget } = req.body;
+  const { name, description, amount, goods, type, budget } = req.body;
 
   if (type === "cash") {
-    if (!amount || amount !== 0)
+    if (!amount || amount === 0)
       return res
         .status(400)
         .json({ success: false, message: "Amount is required for cash type" });
@@ -129,7 +129,26 @@ export const updateAyuda = async (req, res, next) => {
     }
   }
 
-  requiredInputs(["name", "description", "type", "budget"], req.body, res);
+  if (type === "goods") {
+    if (!Array.isArray(goods)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Goods must be an array" });
+    }
+    if (!goods || goods.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Goods are required" });
+    }
+
+    if (goods.length > 5) {
+      return res
+        .status(400)
+        .json({ success: false, message: "goods must not be greater than 5" });
+    }
+  }
+
+  requiredInputs(["name", "type", "budget"], req.body, res);
   validateTypes(["cash", "goods"], type);
 
   try {
@@ -142,11 +161,12 @@ export const updateAyuda = async (req, res, next) => {
         name,
         description,
         amount: type === "cash" ? amount : undefined,
+        goods: type === "goods" ? goods : undefined,
         type,
         budget,
       },
       { new: true }
-    );
+    ).populate("goods");
 
     res.status(200).json({
       succses: true,

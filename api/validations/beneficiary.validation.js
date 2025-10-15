@@ -2,13 +2,13 @@ import { isValidObjectId } from "mongoose";
 import Barangay from "../models/barangay.model.js";
 import Beneficiary from "../models/beneficiary.model.js";
 
-
 export const validateBeneficiary = async (
   fullName,
   dob,
   gender,
   phoneNumber,
   address,
+  validId = null,
   beneficiaryId = null
 ) => {
   const errors = [];
@@ -28,6 +28,31 @@ export const validateBeneficiary = async (
 
   if (!phoneNumber) {
     errors.push("Phone number is required");
+  }
+
+  // Valid ID validation (only required for create, not update)
+  if (!beneficiaryId && !validId) {
+    errors.push("Valid ID is required");
+  }
+
+  if (validId) {
+    // Check if it's a valid base64 image
+    const base64ImageRegex = /^data:image\/(jpeg|jpg|png|gif);base64,/;
+    if (!base64ImageRegex.test(validId)) {
+      errors.push("Valid ID must be a valid image (JPEG, PNG, or GIF)");
+    } else {
+      // Extract base64 data and check size
+      const base64Data = validId.split(",")[1];
+      if (base64Data) {
+        // Calculate file size from base64 (base64 is ~33% larger than original)
+        const sizeInBytes = (base64Data.length * 3) / 4;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+
+        if (sizeInMB > 10) {
+          errors.push("Valid ID image must be less than 10MB");
+        }
+      }
+    }
   }
 
   // Full Name validation
@@ -100,10 +125,14 @@ export const validateBeneficiary = async (
 
   // Address validation (if provided)
   if (address) {
-    const { street, barangay, city } = address;
+    const { municipality, province, barangay } = address;
 
-    if (!street || street.trim() === "") {
-      errors.push("Street address is required");
+    if (!municipality || municipality.trim() === "") {
+      errors.push("Municipality is required");
+    }
+
+    if (!province || province.trim() === "") {
+      errors.push("Province is required");
     }
 
     if (!barangay) {
@@ -118,18 +147,14 @@ export const validateBeneficiary = async (
       }
     }
 
-    if (!city || city.trim() === "") {
-      errors.push("City is required");
+    // Municipality validation
+    if (municipality && municipality.length > 100) {
+      errors.push("Municipality name must be less than 100 characters");
     }
 
-    // Street validation
-    if (street && street.length > 200) {
-      errors.push("Street address must be less than 200 characters");
-    }
-
-    // City validation
-    if (city && city.length > 100) {
-      errors.push("City name must be less than 100 characters");
+    // Province validation
+    if (province && province.length > 100) {
+      errors.push("Province name must be less than 100 characters");
     }
   }
 

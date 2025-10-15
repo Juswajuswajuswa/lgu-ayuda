@@ -7,7 +7,6 @@ export const ayudaSchema = z.object({
   name: z.string(),
   type: z.enum(["cash", "goods"]),
   budget: z.number().int().min(1, "Budget is required"),
-  barangay: z.string().min(1, "Barangay is required"),
   description: z.string().optional(),
   amount: z.number().optional(),
   goods: z.array(z.string()).optional(),
@@ -19,7 +18,6 @@ export const createAyudaRequestSchema = z.object({
   name: z.string().min(1, "Barangay name is required"),
   type: z.enum(["cash", "goods"]),
   budget: z.number().int().min(1, "Budget is required"),
-  barangay: z.string().min(1, "Barangay is required"),
   description: z.string().optional(),
   amount: z.number().optional(),
   goods: z.array(z.string()).optional(),
@@ -32,14 +30,14 @@ export const updateAyudaRequestSchema = createAyudaRequestSchema.partial();
 export const getAyudasResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
-  ayudas: z.array(ayudaSchema),
+  data: z.array(ayudaSchema),
 });
 
 // Get single ayuda response
 export const getAyudaResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  ayuda: ayudaSchema.optional(),
+  data: ayudaSchema,
 });
 
 // Type exports
