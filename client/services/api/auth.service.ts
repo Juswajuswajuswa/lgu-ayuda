@@ -6,6 +6,8 @@ import type {
   OtpRequest,
   VerifyOtpRequest,
   CreateAdminRequest,
+  ForgotPasswordRequest,
+  PasswordResetRequest,
 } from "@/schema/api/auth";
 import type { ApiResponse } from "./types";
 
@@ -43,10 +45,33 @@ export const authService = {
   },
 
   /**
+   * Send forgot password email
+   */
+  sendForgotPassword: async (
+    data: ForgotPasswordRequest
+  ): Promise<ApiResponse> => {
+    return apiClient.post("/auth/send-forgetpassword", data);
+  },
+
+  /**
    * Verify OTP
    */
   verifyOtp: async (data: VerifyOtpRequest): Promise<ApiResponse> => {
-    return apiClient.post("/auth/verify-otp", data);
+    return apiClient.post("/auth/verify-token", data);
+  },
+
+  /**
+   * Resend OTP code
+   */
+  resendOtp: async (data: OtpRequest): Promise<ApiResponse> => {
+    return apiClient.post("/auth/resend-otp", data);
+  },
+
+  /**
+   * Password reset
+   */
+  passwordReset: async (data: PasswordResetRequest): Promise<ApiResponse> => {
+    return apiClient.put(`/auth/forget-password/${data.email}`, data);
   },
 
   /**

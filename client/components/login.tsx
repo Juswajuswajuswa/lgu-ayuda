@@ -62,24 +62,22 @@ export default function LoginPage() {
               {...register("email")}
             />
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Password *</span>
-                <Button asChild variant="link" size="sm" className="h-auto p-0">
-                  <Link href="/forgot-password" className="text-sm">
-                    Forgot your Password?
-                  </Link>
-                </Button>
-              </div>
-              <FormField
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                error={errors.password}
-                required
-                className="mt-0"
-                {...register("password")}
-              />
+            <FormField
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              error={errors.password}
+              required
+              className="mt-0"
+              {...register("password")}
+            />
+
+            <div className="flex items-center justify-end">
+              <Button asChild variant="link" size="sm" className="h-auto p-0">
+                <Link href="/forgot-password" className="text-sm">
+                  Forgot your Password?
+                </Link>
+              </Button>
             </div>
 
             <Button type="submit" className="w-full" disabled={isPending}>
