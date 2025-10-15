@@ -24,6 +24,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 
 export default function CreateAyudaPage() {
+  const [arrayGoods, setArrayGoods] = useState([]);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -41,7 +43,7 @@ export default function CreateAyudaPage() {
     },
   });
 
-  console.log(goodsArray);
+  console.log(goodsArray.data);
 
   return (
     <>
@@ -128,7 +130,22 @@ export default function CreateAyudaPage() {
                       <SelectTrigger className="w-[500px]" id="type">
                         <SelectValue placeholder="Select goods" />
                       </SelectTrigger>
-                      <SelectContent>{/* GOODS */}</SelectContent>
+                      <SelectContent>
+                        {goodsArray.data && goodsArray.data.length > 1 ? (
+                          goodsArray.data.map((goods: any) => (
+                            <SelectItem
+                              key={goods._id}
+                              value={goods._id}
+                              className={goods._id}
+                              id={goods._id}
+                            >
+                              {goods?.product.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <p>no goods</p>
+                        )}
+                      </SelectContent>
                     </Select>
                     <Button type="button">Add</Button>
                   </div>
@@ -152,6 +169,8 @@ export default function CreateAyudaPage() {
                 )}
               </Button>
             </div> */}
+
+            <Button className="w-full">Create Ayuda</Button>
           </form>
         </CardContent>
       </Card>
