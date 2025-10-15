@@ -12,27 +12,8 @@ import React, { useState } from "react";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
 
-<<<<<<< HEAD
-  const { mutate: sendForgetPasswordMutation, isPending } = useMutation({
-    mutationFn: async ({ email }: { email: string }) => {
-      const res = await axiosInstance.post(`/auth/send-forgetpassword`, {
-        email: email,
-      });
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      router.push(`/verify-otp?forget&email=${encodeURIComponent(email)}`);
-    },
-    onError: (err) => {
-      // toast.error(err?.response?.data?.message || "something went wron");
-      console.log(err);
-    },
-  });
-=======
   const { mutate: sendForgetPasswordMutation, isPending } =
     useSendForgotPasswordMutation();
->>>>>>> 93ee3363b270bbe8feb257a2f1bdda4c367cacb6
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
