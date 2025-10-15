@@ -7,6 +7,7 @@ import {
   IconDashboard,
   IconFileDescription,
   IconFileReport,
+  IconFileText,
   IconShield,
   IconShoppingBag,
   IconUserPlus,
@@ -28,11 +29,6 @@ import Logo from "../public/Logo.png";
 import Image from "next/image";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -55,19 +51,24 @@ const data = {
       icon: IconShoppingBag,
     },
     {
+      title: "Ayuda",
+      url: "/dashboard/ayuda",
+      icon: IconShield,
+    },
+    {
       title: "Beneficiaries",
       url: "/dashboard/beneficiaries",
       icon: IconUserPlus,
     },
     {
+      title: "Applications",
+      url: "/dashboard/applications",
+      icon: IconFileText,
+    },
+    {
       title: "Distribution",
       url: "/dashboard/distribution",
       icon: IconBox,
-    },
-    {
-      title: "Ayuda",
-      url: "/dashboard/ayuda",
-      icon: IconShield,
     },
     {
       title: "Projects",
@@ -104,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

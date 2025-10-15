@@ -7,7 +7,7 @@ export const barangayFormSchema = z.object({
   province: z.string().max(100).optional(),
   population: z
     .number({
-      invalid_type_error: "Population must be a number",
+      error: "Population must be a number",
     })
     .int("Population must be a whole number")
     .nonnegative("Population cannot be negative")

@@ -23,8 +23,9 @@ export const useLoginMutation = () => {
     onSuccess: (response) => {
       toast.success(response.message || "Login successful");
       router.push("/dashboard");
-      if (response.success && response.user) {
-        setUser(response.user as any);
+      console.log(response);
+      if (response.success && response.data.user) {
+        setUser(response.data.user as any);
         // Invalidate auth-related queries
         queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser });
       }

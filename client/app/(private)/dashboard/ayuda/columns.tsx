@@ -10,17 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Ayuda = {
-  id: string;
-  name: string;
-  type: "cash" | "goods";
-  budget: number;
-  barangay: string;
-  description: string;
-};
+import { Ayuda } from "@/schema/api/ayuda";
 
 export const columns: ColumnDef<Ayuda>[] = [
   {

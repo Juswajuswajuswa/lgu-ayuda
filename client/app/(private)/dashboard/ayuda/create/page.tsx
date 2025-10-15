@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,172 +7,99 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import axiosInstance from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCreateAyudaMutation } from "@/hooks/query/ayuda/useCreateAyudaMutation";
+import { ayudaFormSchema, type AyudaFormData } from "@/schema/forms/ayuda";
+import { FormField } from "@/components/forms/common/FormField";
 
 export default function CreateAyudaPage() {
-  const [arrayGoods, setArrayGoods] = useState([]);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    amount: 0,
-    goods: "",
-    type: "",
-    budget: 0,
-  });
-
-  const { data: goodsArray = [] } = useQuery({
-    queryKey: ["goods"],
-    queryFn: async () => {
-      const res = await axiosInstance.get(`/goods/get-goods`);
-      return res.data;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AyudaFormData>({
+    resolver: zodResolver(ayudaFormSchema),
+    defaultValues: {
+      name: "",
+      type: "cash",
+      budget: 0,
+      barangay: "",
+      description: "",
+      amount: 0,
+      goods: [],
     },
   });
 
-  console.log(goodsArray.data);
+  const { mutate: createAyuda, isPending } = useCreateAyudaMutation();
+
+  const onSubmit = (data: AyudaFormData) => {
+    createAyuda(data);
+  };
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <div className="space-y-6">
-            <Link
-              href={"/dashboard/ayuda"}
-              className="flex items-center gap-2 text-sm text-muted-foreground"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              Back
-            </Link>
-            <CardTitle>Create Ayuda</CardTitle>
-          </div>
-          <CardDescription>Create a new Ayuda</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-6">
-            <div className="w-full space-y-2">
-              <Label htmlFor="name">Ayuda</Label>
-              <Input
-                id="name"
-                placeholder="Ayuda"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </div>
-            <div className="w-full space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                name="description"
-                placeholder="Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, type: value })
-                }
-              >
-                <SelectTrigger className="w-full" id="type">
-                  <SelectValue placeholder="Select a type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash" id="cash">
-                    Cash
-                  </SelectItem>
-                  <SelectItem value="goods" id="goods">
-                    Goods
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <Card>
+      <CardHeader>
+        <div className="space-y-6">
+          <Link
+            href="/dashboard/ayuda"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            Back
+          </Link>
+          <CardTitle>Create Ayuda</CardTitle>
+        </div>
+        <CardDescription>Create a new ayuda</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            label="Ayuda Name"
+            placeholder="Akap Bata"
+            error={errors.name}
+            required
+            {...register("name")}
+          />
 
-            {formData.type === "cash" && (
-              <div className="space-y-2">
-                <Label>Amount</Label>
-                <Input type="number" name="amount" placeholder="Amount" />
-              </div>
+          <FormField
+            label="Description"
+            placeholder="This is a description"
+            error={errors.description}
+            {...register("description")}
+          />
+
+          <FormField
+            label="Ayuda Type"
+            placeholder="Cash"
+            error={errors.type}
+            {...register("type")}
+          />
+
+          <FormField
+            label="Amount"
+            placeholder="1000"
+            type="number"
+            min={1}
+            error={errors.amount}
+            {...register("amount")}
+          />
+
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Creating...
+              </>
+            ) : (
+              "Create Ayuda"
             )}
-
-            {formData.type === "goods" && (
-              <div className="space-x-2 flex items-center">
-                <div className="space-y-2">
-                  <Label>Type</Label>
-
-                  <div className="flex space-x-2">
-                    <Select
-                      value={formData.goods}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, goods: value })
-                      }
-                    >
-                      <SelectTrigger className="w-[500px]" id="type">
-                        <SelectValue placeholder="Select goods" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {goodsArray.data && goodsArray.data.length > 1 ? (
-                          goodsArray.data.map((goods: any) => (
-                            <SelectItem
-                              key={goods._id}
-                              value={goods._id}
-                              className={goods._id}
-                              id={goods._id}
-                            >
-                              {goods?.product.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <p>no goods</p>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <Button type="button">Add</Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label>Budget</Label>
-              <Input type="number" name="amount" placeholder="Budget" />
-            </div>
-            {/* <div className="mt-5">
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-            </div> */}
-
-            <Button className="w-full">Create Ayuda</Button>
-          </form>
-        </CardContent>
-      </Card>
-    </>
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

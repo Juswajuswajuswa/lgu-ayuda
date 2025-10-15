@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema, passwordSchema } from "../common/base";
+import { emailSchema, mongoIdSchema, passwordSchema } from "../common/base";
 
 // Login request
 export const loginRequestSchema = z.object({
@@ -11,15 +11,15 @@ export const loginRequestSchema = z.object({
 export const loginResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  user: z
-    .object({
-      id: z.string(),
+  data: z.object({
+    user: z.object({
+      id: mongoIdSchema,
       email: z.string().email(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
       role: z.enum(["admin", "staff", "user"]),
-    })
-    .optional(),
+    }),
+  }),
 });
 
 // Check admin response
