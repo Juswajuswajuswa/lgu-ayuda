@@ -8,7 +8,7 @@ import { validateBeneficiary } from "../validations/beneficiary.validation.js";
 export const registerBeneficiary = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  const { fullName, dob, gender, phoneNumber, address } = req.body;
+  const { fullName, dob, gender, phoneNumber, validId, address } = req.body;
 
   try {
     // Use validation function instead of requiredInputs
@@ -33,13 +33,18 @@ export const registerBeneficiary = async (req, res, next) => {
     if (address) {
       const { municipality, barangay, province } = address;
       if (!municipality || !barangay || !province) {
-        throw new AppError(400, "Please input required fields under address");
+        return res.status(400).json({
+          success: false,
+          message: "Please input required fields under address",
+        });
       }
 
       if (!isValidObjectId(barangay))
-        throw new AppError(400, "Invalid Barangay ID");
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid Barangay ID" });
 
-      beneficiaryAddress = { municipality, city, province };
+      beneficiaryAddress = { municipality, province, barangay };
     }
 
     const beneficiary = new Beneficiary({
@@ -48,6 +53,7 @@ export const registerBeneficiary = async (req, res, next) => {
       gender,
       phoneNumber,
       address: beneficiaryAddress,
+      validId,
     });
 
     // const scanUrl = `http://192.168.100.145:5000/api/beneficiary/${beneficiary._id}/scan`;
@@ -59,9 +65,8 @@ export const registerBeneficiary = async (req, res, next) => {
 
     // beneficiary.qrCode = qrCodeBase64;
 
+    beneficiary.claimCode = beneficiary._id;
     const savedBeneficiary = await beneficiary.save({ session });
-
-    savedBeneficiary.claimCode = beneficiary._id;
 
     if (beneficiaryAddress?.barangay) {
       await Barangay.findByIdAndUpdate(
@@ -81,7 +86,7 @@ export const registerBeneficiary = async (req, res, next) => {
       message: "Successfully registered a user",
       data: {
         claimCode: beneficiary._id,
-        beneficiary: beneficiary,
+        beneficiary: savedBeneficiary,
       },
     });
   } catch (error) {
@@ -97,15 +102,11 @@ export const archiveBeneficiary = async (req, res, next) => {
     const { beneficiaryId } = req.params;
     const { isArchived } = req.body;
 
-    const beneficiary = await Beneficiary.findByIdAndUpdate(
-      beneficiaryId,
-      {
-        $set: {
-          isArchived: isArchived,
-        },
+    const beneficiary = await Beneficiary.findByIdAndUpdate(beneficiaryId, {
+      $set: {
+        isArchived: isArchived,
       },
-      { new: true }
-    );
+    });
 
     if (!beneficiary)
       return res
@@ -130,9 +131,7 @@ export const getSingleBeneficiary = async (req, res, next) => {
       return res
         .status(400)
         .json({ success: false, message: "invalid id or no beneficiary" });
-    res
-      .status(200)
-      .json({ success: true, message: "successfully fetched", beneficiary });
+    res.status(200).json({ success: true, message: "successfully" });
   } catch (error) {
     next(error);
   }
