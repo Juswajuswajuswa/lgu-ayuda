@@ -135,7 +135,12 @@ export const getSingleBeneficiary = async (req, res, next) => {
       return res
         .status(400)
         .json({ success: false, message: "invalid id or no beneficiary" });
-    res.status(200).json({ success: true, message: "successfully" });
+    res.status(200).json({
+      success: true,
+      message: "successfully fetched",
+      beneficiary,
+      data: beneficiary,
+    });
   } catch (error) {
     next(error);
   }
