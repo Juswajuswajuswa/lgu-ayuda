@@ -2,10 +2,8 @@ import { z } from "zod";
 import { mongoIdSchema } from "../common/base";
 
 export const createTodoSchema = z.object({
-  title: z
-    .string({ required_error: "Title is required." })
-    .min(1, "Title cannot be empty."),
-  status: z.enum(["in progress", "completed", "cancelled"]),
+  title: z.string(),
+  status: z.enum(["in progress", "completed", "cancelled"]).optional(),
 });
 
 const dbTodoSchema = createTodoSchema.extend({
@@ -43,10 +41,16 @@ export const getProjectsResponseSchema = z.object({
 
 // 5. Schema for UPDATING a project (no changes needed here)
 export const updateProjectSchema = createProjectSchema.partial();
+export const UpdateProjectTodoSchema = createTodoSchema.partial();
 
 // --- TypeScript Types ---
+export type CreateProjectTodoInput = z.infer<typeof createTodoSchema>;
+
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
+
+export type UpdateTodoProjectInput = z.infer<typeof createTodoSchema>;
+
 export type Project = z.infer<typeof projectSchema>;
 export type MutateProjectsResponse = z.infer<typeof mutateProjectResponse>;
 

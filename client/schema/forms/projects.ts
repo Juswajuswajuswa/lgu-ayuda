@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const projectsTodoSchema = z.object({
+  title: z
+    .string({ required_error: "Title is required." })
+    .min(1, "Title cannot be empty."),
+  status: z.enum(["in progress", "completed", "cancelled"]).optional()
+});
+
 export const projectsFormSchema = z.object({
   projectName: z
     .string()
@@ -21,3 +28,4 @@ export const projectsFormSchema = z.object({
 });
 
 export type ProjectsFormData = z.infer<typeof projectsFormSchema>;
+export type ProjectTodoFormData = z.infer<typeof projectsTodoSchema>;
