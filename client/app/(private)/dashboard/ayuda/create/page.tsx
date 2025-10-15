@@ -33,7 +33,7 @@ export default function CreateAyudaPage() {
     budget: 0,
   });
 
-  const { data: goods = [] } = useQuery({
+  const { data: goodsArray = [] } = useQuery({
     queryKey: ["goods"],
     queryFn: async () => {
       const res = await axiosInstance.get(`/goods/get-goods`);
@@ -41,7 +41,7 @@ export default function CreateAyudaPage() {
     },
   });
 
-  console.log(goods);
+  console.log(goodsArray);
 
   return (
     <>
@@ -128,14 +128,7 @@ export default function CreateAyudaPage() {
                       <SelectTrigger className="w-[500px]" id="type">
                         <SelectValue placeholder="Select goods" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cash" id="cash">
-                          Cash
-                        </SelectItem>
-                        <SelectItem value="goods" id="goods">
-                          Goods
-                        </SelectItem>
-                      </SelectContent>
+                      <SelectContent>{/* GOODS */}</SelectContent>
                     </Select>
                     <Button type="button">Add</Button>
                   </div>

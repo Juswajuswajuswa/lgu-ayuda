@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
     },
     onSuccess: (data) => {
       toast.success(data.message);
-      router.push(`/verify-otp?board&email=${encodeURIComponent(email)}`);
+      router.push(`/verify-otp?forget&email=${encodeURIComponent(email)}`);
     },
     onError: (err) => {
       // toast.error(err?.response?.data?.message || "something went wron");
