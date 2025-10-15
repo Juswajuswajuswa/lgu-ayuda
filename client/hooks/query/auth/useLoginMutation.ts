@@ -21,14 +21,12 @@ export const useLoginMutation = () => {
       setError(null);
     },
     onSuccess: (response) => {
+      toast.success(response.message || "Login successful");
+      router.push("/dashboard");
       if (response.success && response.user) {
         setUser(response.user as any);
-        toast.success(response.message || "Login successful");
-
         // Invalidate auth-related queries
         queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser });
-
-        router.push("/dashboard");
       }
     },
     onError: (error: any) => {
