@@ -11,8 +11,8 @@ const BeneficiaryModelSchema = new mongoose.Schema(
     gender: { type: String, enum: ["male", "female", "other"] },
     phoneNumber: { type: String, required: true },
     address: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
+      municipality: { type: String, required: true },
+      province: { type: String, required: true },
       barangay: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Barangay",

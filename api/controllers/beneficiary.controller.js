@@ -31,15 +31,15 @@ export const registerBeneficiary = async (req, res, next) => {
 
     let beneficiaryAddress;
     if (address) {
-      const { street, barangay, city } = address;
-      if (!street || !barangay || !city) {
+      const { municipality, barangay, province } = address;
+      if (!municipality || !barangay || !province) {
         throw new AppError(400, "Please input required fields under address");
       }
 
       if (!isValidObjectId(barangay))
         throw new AppError(400, "Invalid Barangay ID");
 
-      beneficiaryAddress = { street, city, barangay };
+      beneficiaryAddress = { municipality, city, province };
     }
 
     const beneficiary = new Beneficiary({
@@ -251,7 +251,7 @@ export const updateBeneficiary = async (req, res, next) => {
     let oldBarangayId = beneficiary.address?.barangay;
 
     if (address) {
-      const { street, barangay, city } = address;
+      const { municipality, barangay, province } = address;
 
       // Verify barangay exists (already checked in validation, but double-check for safety)
       const barangayExists = await Barangay.findById(barangay).session(session);
@@ -260,8 +260,8 @@ export const updateBeneficiary = async (req, res, next) => {
       }
 
       beneficiaryAddress = {
-        street: street.trim(),
-        city: city.trim(),
+        municipality: municipality.trim(),
+        province: province.trim(),
         barangay,
       };
 
