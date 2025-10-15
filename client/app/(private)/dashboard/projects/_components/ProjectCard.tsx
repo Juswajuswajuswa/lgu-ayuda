@@ -12,9 +12,14 @@ export default function ProjectCard() {
     <Card>
       <CardHeader className="flex justify-between">
         <CardTitle>Project</CardTitle>
-        <Button>
-          <PlusIcon />
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant={"outline"}>
+            <Edit />
+          </Button>
+          <Button>
+            <PlusIcon />
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent>
