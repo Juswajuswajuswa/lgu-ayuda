@@ -11,21 +11,15 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import Link from "next/link";
+import type { User } from "@/schema/api/users";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Staff = {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  email: string;
-  role: string;
-  barangay: {
+export type Staff = User & {
+  phoneNumber?: string;
+  barangay?: {
     _id: string;
     name: string;
-    municipality: string;
-    province: string;
+    municipality?: string;
+    province?: string;
   };
 };
 
@@ -41,6 +35,7 @@ export const columns: ColumnDef<Staff>[] = [
   {
     accessorKey: "phoneNumber",
     header: "Phone Number",
+    cell: ({ row }) => row.original.phoneNumber || "-",
   },
   {
     accessorKey: "email",
@@ -54,7 +49,7 @@ export const columns: ColumnDef<Staff>[] = [
     accessorKey: "barangay",
     header: "Barangay",
     cell: ({ row }) => {
-      return <span>{row.original.barangay?.name}</span>;
+      return <span>{row.original.barangay?.name || "-"}</span>;
     },
   },
   {

@@ -8,71 +8,59 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import axiosInstance from "@/lib/axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useDeleteBarangayMutation } from "@/hooks/query/barangay/useDeleteBarangayMutation";
 
 export default function DeleteBarangayPage() {
   const params = useParams();
   const { id } = params;
-
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const { mutate: deleteBarangay, isPending } = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await axiosInstance.delete(`/barangay/delete-barangay/${id}`);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["barangays"] });
-      router.push("/dashboard/barangay");
-    },
-    onError: (error: any) => {
-      toast.error(error.response.data.message);
-    },
-  });
+
+  const { mutate: deleteBarangay, isPending } = useDeleteBarangayMutation();
+
+  const handleDelete = () => {
+    deleteBarangay(id as string);
+  };
+
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <div className="space-y-6">
-            <Link
-              href="/dashboard/barangay"
-              className="flex items-center gap-2 text-sm text-muted-foreground"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              Back
-            </Link>
-            <CardTitle>Delete Barangay</CardTitle>
-          </div>
-          <CardDescription>
-            Are you sure you want to delete this barangay?
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center gap-2">
-          <Button
-            variant="destructive"
-            onClick={() => deleteBarangay(id as string)}
-            disabled={isPending}
+    <Card>
+      <CardHeader>
+        <div className="space-y-6">
+          <Link
+            href="/dashboard/barangay"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              "Delete"
-            )}
-          </Button>
-          <Button variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
-        </CardContent>
-      </Card>
-    </>
+            <ArrowLeftIcon className="w-4 h-4" />
+            Back
+          </Link>
+          <CardTitle>Delete Barangay</CardTitle>
+        </div>
+        <CardDescription>
+          Are you sure you want to delete this barangay? This action cannot be
+          undone.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex items-center gap-2">
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              Deleting...
+            </>
+          ) : (
+            "Delete"
+          )}
+        </Button>
+        <Button variant="outline" onClick={() => router.back()}>
+          Cancel
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

@@ -7,168 +7,128 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import axiosInstance from "@/lib/axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
-export default function EditBarangayPage() {
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { goodsFormSchema, type GoodsFormData } from "@/schema/forms/goods";
+import { useGood } from "@/hooks/query/goods/useGood";
+import { useUpdateGoodsMutation } from "@/hooks/query/goods/useUpdateGoodsMutation";
+import { FormField } from "@/components/forms/common/FormField";
+
+export default function EditGoodsPage() {
   const params = useParams();
-  const { id } = params;
+  const { id } = params as { id: string };
+
+  const { data: response, isPending: isLoadingGoods } = useGood(id);
+  const goods = response?.goods;
 
   const {
-    data: goods,
-    isPending: isGoodsPending,
-    isError: isGoodsError,
-  } = useQuery({
-    queryKey: ["goods", id],
-    queryFn: async () => {
-      const res = await axiosInstance.get(`/goods/get-good/${id}`);
-      return res.data.goods;
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<GoodsFormData>({
+    resolver: zodResolver(goodsFormSchema),
+    defaultValues: {
+      product: {
+        name: "",
+        details: "",
+      },
+      quantity: 1,
     },
   });
 
-  console.log(goods);
+  const { mutate: updateGoods, isPending } = useUpdateGoodsMutation(id);
 
-  const [formData, setFormData] = useState({
-    product: {
-      name: "",
-      details: "",
-    },
-    quantity: 0,
-  });
-
+  // Update form when goods data loads
   useEffect(() => {
     if (goods) {
-      setFormData({
+      reset({
         product: {
           name: goods.product.name || "",
           details: goods.product.details || "",
         },
-        quantity: goods.quantity || 0,
+        quantity: goods.quantity || 1,
       });
     }
-  }, [goods]);
+  }, [goods, reset]);
 
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
-  const { mutate: updateGoods, isPending } = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await axiosInstance.put(`/goods/update-goods/${id}`, data);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["goods"] });
-      router.push("/dashboard/goods");
-    },
-    onError: (error: any) => {
-      const serverError = error?.response?.data;
-
-      if (serverError?.message === "Validation failed" && serverError?.errors) {
-        Object.entries(serverError.errors).forEach(([field, message]) => {
-          toast.error(`${field}: ${message}`);
-        });
-      } else {
-        toast.error(serverError?.message || "Something went wrong");
-      }
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    updateGoods(formData);
+  const onSubmit = (data: GoodsFormData) => {
+    updateGoods(data);
   };
-  return (
-    <>
+
+  if (isLoadingGoods) {
+    return (
       <Card>
-        <CardHeader>
-          <div className="space-y-6">
-            <Link
-              href="/dashboard/goods"
-              className="flex items-center gap-2 text-sm text-muted-foreground"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              Back
-            </Link>
-            <CardTitle>Edit Goods</CardTitle>
-          </div>
-          <CardDescription>Update a barangay information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex gap-6 w-full">
-              <div className="w-full space-y-2">
-                <Label htmlFor="product.name">Product Name</Label>
-                <Input
-                  id="product.name"
-                  placeholder="Rice"
-                  value={formData.product.name}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      product: { ...formData.product, name: e.target.value },
-                    })
-                  }
-                />
-              </div>
-              <div className="w-full space-y-2">
-                <Label htmlFor="product.details">Product Details</Label>
-                <Input
-                  id="product.details"
-                  placeholder="100kg"
-                  value={formData.product.details}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      product: { ...formData.product, details: e.target.value },
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex gap-6 w-full">
-              <div className="w-full space-y-2">
-                <Label htmlFor="quantity">Product Quantity</Label>
-                <Input
-                  id="quantity"
-                  placeholder="100"
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={formData.quantity}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      quantity: parseInt(e.target.value),
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div className="mt-5">
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-            </div>
-          </form>
+        <CardContent className="h-48 flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Loading goods data...</span>
         </CardContent>
       </Card>
-    </>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="space-y-6">
+          <Link
+            href="/dashboard/goods"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            Back
+          </Link>
+          <CardTitle>Edit Goods</CardTitle>
+        </div>
+        <CardDescription>Update goods information</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              label="Product Name"
+              placeholder="Rice"
+              error={errors.product?.name}
+              required
+              {...register("product.name")}
+            />
+
+            <FormField
+              label="Product Details"
+              placeholder="100kg"
+              error={errors.product?.details}
+              required
+              {...register("product.details")}
+            />
+          </div>
+
+          <FormField
+            label="Product Quantity"
+            type="number"
+            placeholder="100"
+            min={1}
+            error={errors.quantity}
+            required
+            {...register("quantity", { valueAsNumber: true })}
+          />
+
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Updating...
+              </>
+            ) : (
+              "Update Goods"
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

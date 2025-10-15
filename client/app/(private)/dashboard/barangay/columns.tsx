@@ -11,15 +11,7 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { Link, MoreVerticalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Barangay = {
-  _id: string;
-  name: string;
-  municipality: string;
-  province: string;
-};
+import type { Barangay } from "@/schema/api/barangay";
 
 export const columns: ColumnDef<Barangay>[] = [
   {
@@ -29,10 +21,12 @@ export const columns: ColumnDef<Barangay>[] = [
   {
     accessorKey: "municipality",
     header: "Municipality",
+    cell: ({ row }) => row.original.municipality || "-",
   },
   {
     accessorKey: "province",
     header: "Province",
+    cell: ({ row }) => row.original.province || "-",
   },
   {
     accessorKey: "actions",

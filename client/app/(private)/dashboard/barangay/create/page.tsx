@@ -7,119 +7,89 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-
-import axiosInstance from "@/lib/axios";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  barangayFormSchema,
+  type BarangayFormData,
+} from "@/schema/forms/barangay";
+import { useCreateBarangayMutation } from "@/hooks/query/barangay/useCreateBarangayMutation";
+import { FormField } from "@/components/forms/common/FormField";
 
 export default function CreateBarangayPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    municipality: "",
-    province: "",
-  });
-
-  const router = useRouter();
-  const { mutate: createBarangay, isPending } = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await axiosInstance.post("/barangay/add-barangay", data);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      router.push("/dashboard/barangay");
-    },
-    onError: (error: any) => {
-      const serverError = error?.response?.data;
-
-      if (serverError?.message === "Validation failed" && serverError?.errors) {
-        Object.entries(serverError.errors).forEach(([field, message]) => {
-          toast.error(`${field}: ${message}`);
-        });
-      } else {
-        toast.error(serverError?.message || "Something went wrong");
-      }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<BarangayFormData>({
+    resolver: zodResolver(barangayFormSchema),
+    defaultValues: {
+      name: "",
+      municipality: "",
+      province: "",
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const { mutate: createBarangay, isPending } = useCreateBarangayMutation();
 
-    createBarangay(formData);
+  const onSubmit = (data: BarangayFormData) => {
+    createBarangay(data);
   };
+
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <div className="space-y-6">
-            <Link
-              href="/dashboard/barangay"
-              className="flex items-center gap-2 text-sm text-muted-foreground"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              Back
-            </Link>
-            <CardTitle>Create Barangay</CardTitle>
-          </div>
-          <CardDescription>Create a new barangay</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="w-full space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                placeholder="Lower Bicutan"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </div>
-            <div className="w-full space-y-2">
-              <Label htmlFor="municipality">Municipality</Label>
-              <Input
-                id="municipality"
-                placeholder="Taguig"
-                value={formData.municipality}
-                onChange={(e) =>
-                  setFormData({ ...formData, municipality: e.target.value })
-                }
-              />
-            </div>
-            <div className="w-full space-y-2">
-              <Label htmlFor="province">Province</Label>
-              <Input
-                id="province"
-                placeholder="Metro Manila"
-                value={formData.province}
-                onChange={(e) =>
-                  setFormData({ ...formData, province: e.target.value })
-                }
-              />
-            </div>
-            <div className="mt-5">
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </>
+    <Card>
+      <CardHeader>
+        <div className="space-y-6">
+          <Link
+            href="/dashboard/barangay"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            Back
+          </Link>
+          <CardTitle>Create Barangay</CardTitle>
+        </div>
+        <CardDescription>Create a new barangay</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            label="Barangay Name"
+            placeholder="Lower Bicutan"
+            error={errors.name}
+            required
+            {...register("name")}
+          />
+
+          <FormField
+            label="Municipality"
+            placeholder="Taguig"
+            error={errors.municipality}
+            {...register("municipality")}
+          />
+
+          <FormField
+            label="Province"
+            placeholder="Metro Manila"
+            error={errors.province}
+            {...register("province")}
+          />
+
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Creating...
+              </>
+            ) : (
+              "Create Barangay"
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

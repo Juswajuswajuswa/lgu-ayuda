@@ -1,54 +1,42 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Logo from "../public/Logo.png";
 import Image from "next/image";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginFormSchema, type LoginFormData } from "@/schema/forms/auth";
+import { useCheckAdmin } from "@/hooks/query/auth/useCheckAdmin";
+import { useLoginMutation } from "@/hooks/query/auth/useLoginMutation";
+import { FormField } from "@/components/forms/common/FormField";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { data: response, isLoading } = useCheckAdmin();
+  const isAdminExist = response?.success;
 
-  const router = useRouter();
-  const { data: isAdminExist, isLoading } = useQuery({
-    queryKey: ["isAdminExist"],
-    queryFn: async () => {
-      const res = await axiosInstance.get("/auth/admin");
-      return res.data.success;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
     },
   });
 
-  const { mutate: login, isPending } = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await axiosInstance.post("/auth/signin", data);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      router.push("/dashboard");
-    },
-    onError: (error: any) => {
-      toast.error(error.response.data.message);
-    },
-  });
+  const { mutate: login, isPending } = useLoginMutation();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    login({ email, password });
+  const onSubmit = (data: LoginFormData) => {
+    login(data);
   };
 
   return (
     <section className="flex min-h-screen px-4 py-16 md:py-32">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
         <div className="p-8 pb-6">
@@ -65,50 +53,36 @@ export default function LoginPage() {
           <hr className="my-4 border-dashed" />
 
           <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="block text-sm">
-                Email
-              </Label>
-              <Input
-                type="email"
-                required
-                name="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <FormField
+              label="Email"
+              type="email"
+              placeholder="your@email.com"
+              error={errors.email}
+              required
+              {...register("email")}
+            />
 
-            <div className="space-y-0.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="pwd" className="text-sm">
-                  Password
-                </Label>
-                <Button asChild variant="link" size="sm">
-                  <Link
-                    href="/forgot-password"
-                    className="link intent-info variant-ghost text-sm"
-                  >
-                    Forgot your Password ?
+                <span className="text-sm font-medium">Password *</span>
+                <Button asChild variant="link" size="sm" className="h-auto p-0">
+                  <Link href="/forgot-password" className="text-sm">
+                    Forgot your Password?
                   </Link>
                 </Button>
               </div>
-              <Input
+              <FormField
+                label="Password"
                 type="password"
+                placeholder="Enter your password"
+                error={errors.password}
                 required
-                name="pwd"
-                id="pwd"
-                className="input sz-md variant-mixed"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                className="mt-0"
+                {...register("password")}
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              onClick={() => login({ email, password })}
-            >
+            <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? "Signing in..." : "Sign In"}
             </Button>
           </div>
@@ -117,7 +91,7 @@ export default function LoginPage() {
         {!isAdminExist && !isLoading && (
           <div className="bg-muted rounded-(--radius) border p-3">
             <p className="text-accent-foreground text-center text-sm">
-              Don't have an account ?
+              Don't have an account?
               <Button asChild variant="link" className="px-2">
                 <Link href="/create-admin">Create Admin</Link>
               </Button>
