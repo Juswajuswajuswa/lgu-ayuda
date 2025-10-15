@@ -4,7 +4,6 @@ const TodoSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    unique: true,
   },
   status: {
     type: String,
@@ -26,6 +25,7 @@ const ProjectModelSchema = new mongoose.Schema({
   budget: {
     type: Number,
     default: 0,
+    required: true,
   },
   status: {
     type: String,
