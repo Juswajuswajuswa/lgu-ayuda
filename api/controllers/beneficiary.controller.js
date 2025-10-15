@@ -31,15 +31,15 @@ export const registerBeneficiary = async (req, res, next) => {
 
     let beneficiaryAddress;
     if (address) {
-      const { street, barangay, city } = address;
-      if (!street || !barangay || !city) {
+      const { municipality, barangay, province } = address;
+      if (!municipality || !barangay || !province) {
         throw new AppError(400, "Please input required fields under address");
       }
 
       if (!isValidObjectId(barangay))
         throw new AppError(400, "Invalid Barangay ID");
 
-      beneficiaryAddress = { street, city, barangay };
+      beneficiaryAddress = { municipality, city, province };
     }
 
     const beneficiary = new Beneficiary({
@@ -89,6 +89,52 @@ export const registerBeneficiary = async (req, res, next) => {
     next(error);
   } finally {
     session.endSession();
+  }
+};
+
+export const archiveBeneficiary = async (req, res, next) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const { isArchived } = req.body;
+
+    const beneficiary = await Beneficiary.findByIdAndUpdate(
+      beneficiaryId,
+      {
+        $set: {
+          isArchived: isArchived,
+        },
+      },
+      { new: true }
+    );
+
+    if (!beneficiary)
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid id or no beneficiary" });
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully updated to archive",
+      data: beneficiary,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSingleBeneficiary = async (req, res, next) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const beneficiary = await Beneficiary.findById(beneficiaryId);
+    if (!beneficiary)
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid id or no beneficiary" });
+    res
+      .status(200)
+      .json({ success: true, message: "successfully fetched", beneficiary });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -149,7 +195,7 @@ export const registerBeneficiary = async (req, res, next) => {
 
 export const getBeneficiaries = async (req, res, next) => {
   try {
-    const beneficiaries = await Beneficiary.find()
+    const beneficiaries = await Beneficiary.find({ isArchived: true })
       .populate({
         path: "address.barangay",
         select: "name municipality province",
@@ -205,7 +251,7 @@ export const updateBeneficiary = async (req, res, next) => {
     let oldBarangayId = beneficiary.address?.barangay;
 
     if (address) {
-      const { street, barangay, city } = address;
+      const { municipality, barangay, province } = address;
 
       // Verify barangay exists (already checked in validation, but double-check for safety)
       const barangayExists = await Barangay.findById(barangay).session(session);
@@ -214,8 +260,8 @@ export const updateBeneficiary = async (req, res, next) => {
       }
 
       beneficiaryAddress = {
-        street: street.trim(),
-        city: city.trim(),
+        municipality: municipality.trim(),
+        province: province.trim(),
         barangay,
       };
 

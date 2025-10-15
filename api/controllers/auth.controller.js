@@ -181,7 +181,7 @@ export const forgetPassword = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Successfully sent an otp to your email",
+      message: "Successfully changed password",
       data: savedUser,
     });
   } catch (error) {
