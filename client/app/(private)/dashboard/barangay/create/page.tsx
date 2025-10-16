@@ -50,9 +50,9 @@ export default function CreateBarangayPage() {
             <ArrowLeftIcon className="w-4 h-4" />
             Back
           </Link>
-          <CardTitle>Create Barangay</CardTitle>
+          <CardTitle>Add Barangay</CardTitle>
         </div>
-        <CardDescription>Create a new barangay</CardDescription>
+        <CardDescription>Add a new barangay</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -85,7 +85,7 @@ export default function CreateBarangayPage() {
                 Creating...
               </>
             ) : (
-              "Create Barangay"
+              "Add Barangay"
             )}
           </Button>
         </form>
