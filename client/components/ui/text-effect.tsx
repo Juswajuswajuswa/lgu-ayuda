@@ -175,7 +175,9 @@ const createVariantsWithTransition = (
 ): Variants => {
   if (!transition) return baseVariants;
 
-  const mainTransition = { ...transition } as Transition & { exit?: Transition };
+  const mainTransition = { ...transition } as Transition & {
+    exit?: Transition;
+  };
   // remove exit from applied transition while keeping type safety
   delete (mainTransition as { exit?: Transition }).exit;
 
