@@ -143,8 +143,8 @@ export default function CreateBeneficiaryPage() {
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.validId as any}
-                accept="image/jpeg,image/jpg,image/png,image/gif"
-                helperText="Upload a valid government-issued ID (JPEG, PNG, or GIF, max 5MB)"
+                accept="image/*,.pdf"
+                helperText="Upload a valid government-issued ID (max 5MB)"
                 required
               />
             )}
@@ -198,7 +198,7 @@ export default function CreateBeneficiaryPage() {
                 Creating...
               </>
             ) : (
-              "Create Beneficiary"
+              "Add Beneficiary"
             )}
           </Button>
         </form>
