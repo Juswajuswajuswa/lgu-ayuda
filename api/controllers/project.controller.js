@@ -177,8 +177,13 @@ export const updateTodoStatus = async (req, res, next) => {
         (item) => item.status === "completed"
       );
 
+      const allCancelled = projectTodosArray.every(
+        (item) => item.status === "cancelled"
+      );
       if (allCompleted) {
         project.status = "completed";
+      } else if (allCancelled) {
+        project.status = "cancelled";
       } else {
         project.status = "in progress";
       }
