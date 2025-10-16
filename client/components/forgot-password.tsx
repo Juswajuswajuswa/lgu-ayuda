@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
 
           <div className="mt-6 text-center">
             <p className="text-muted-foreground text-sm">
-              We'll send you a verification code to reset your password.
+              We&apos;ll send you a verification code to reset your password.
             </p>
           </div>
         </div>

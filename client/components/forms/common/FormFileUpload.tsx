@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -145,10 +146,12 @@ export const FormFileUpload = ({
           <div className="border rounded-md p-4 space-y-3">
             {preview ? (
               <div className="relative w-full h-48 bg-muted rounded-md overflow-hidden">
-                <img
+                <Image
                   src={preview}
                   alt="Preview"
-                  className="w-full h-full object-contain"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  unoptimized
                 />
               </div>
             ) : (

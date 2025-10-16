@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { format, subDays, startOfDay } from "date-fns";
+import { format, subDays } from "date-fns";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -32,8 +32,15 @@ import { Loader2 } from "lucide-react";
 
 export const description = "Budget spent over time chart";
 
+type Distribution = {
+  applicationId?: { ayuda?: { amount?: number } };
+  dateReleased?: string | number | Date;
+  createdAt?: string | number | Date;
+  _id?: string;
+};
+
 // Process distributions into time-based budget data
-const processChartData = (distributions: any[], timeRange: number) => {
+const processChartData = (distributions: Distribution[], timeRange: number) => {
   const endDate = new Date();
   const startDate = subDays(endDate, timeRange);
 

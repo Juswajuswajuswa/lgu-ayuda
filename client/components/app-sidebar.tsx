@@ -6,7 +6,6 @@ import {
   IconBuilding,
   IconDashboard,
   IconFileDescription,
-  IconFileReport,
   IconFileText,
   IconShield,
   IconShoppingBag,
