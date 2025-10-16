@@ -49,7 +49,7 @@ export default function CreateStaffPage() {
     onSuccess: (data) => {
       toast.success(data.message);
       router.push("/dashboard/staff");
-      queryClient.invalidateQueries({ queryKey: ["staffs"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error: any) => {
       const serverError = error?.response?.data;

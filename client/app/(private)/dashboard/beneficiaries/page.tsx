@@ -20,6 +20,8 @@ export default function BeneficiariesPage() {
 
   const beneficiaries = response?.beneficiaries || [];
 
+  console.log(beneficiaries)
+
   return (
     <Card>
       <CardHeader>
