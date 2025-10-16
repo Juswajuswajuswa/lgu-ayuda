@@ -7,7 +7,7 @@ export const userSchema = z.object({
   email: z.string().email(),
   firstName: z.string(),
   lastName: z.string(),
-  role: z.enum(["admin", "staff", "user"]),
+  role: z.enum(["admin", "encoder", "validator", "distributer"]),
   isActive: z.boolean().optional(),
   ...timestampSchema.shape,
 });
@@ -18,7 +18,9 @@ export const createUserRequestSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["admin", "staff", "user"]).default("staff"),
+  role: z
+    .enum(["admin", "encoder", "validator", "distributer"])
+    .default("encoder"),
 });
 
 // Update user request

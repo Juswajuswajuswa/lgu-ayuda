@@ -6,8 +6,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import Logo from "../public/Logo.png";
 import Image from "next/image";
+import { useCheckAdmin } from "@/hooks/query/auth/useCheckAdmin";
 
 export const HeroHeader = () => {
+  const { data: response, isLoading } = useCheckAdmin();
+  const isAdminExist = response?.success;
+
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -68,9 +72,11 @@ export const HeroHeader = () => {
                   size="sm"
                   className={cn(isScrolled && "lg:hidden")}
                 >
-                  <Link href="/create-admin">
-                    <span>Create Admin</span>
-                  </Link>
+                  {!isAdminExist && !isLoading && (
+                    <Link href="/create-admin">
+                      <span>Create Admin</span>
+                    </Link>
+                  )}
                 </Button>
                 <Button
                   asChild
