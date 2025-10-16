@@ -99,25 +99,38 @@ export const deleteTodos = async (req, res, next) => {
   try {
     const { id, todoId } = req.params;
 
+    // 1. Find the parent project
     const project = await Project.findById(id);
-    if (!project)
+    if (!project) {
       return res
-        .status(400)
+        .status(404) // Use 404 for "Not Found"
         .json({ success: false, message: "Invalid project id" });
+    }
+
+    // 2. Find the specific todo subdocument
     const projectTodo = project.projectTodos.id(todoId);
-    if (!projectTodo)
+    if (!projectTodo) {
       return res
-        .status(400)
+        .status(404)
         .json({ success: false, message: "Invalid project todo id" });
+    }
 
-    projectTodo.deleteOne();
+    // 3. Mark the subdocument for removal
+    await projectTodo.deleteOne();
 
+    // 4. (FIX) Check if the parent array is now empty *after* deletion
+    if (project.projectTodos.length === 0) {
+      project.status = "in progress"; // Or whatever default you prefer
+    }
+
+    // 5. Save the changes to the parent project document
     await project.save();
 
     res.status(200).json({
       success: true,
       message: "Todo deleted successfully",
-      project,
+      // It's good practice to send back the updated project
+      data: project,
     });
   } catch (error) {
     next(error);
@@ -369,6 +382,7 @@ export const getSingleProject = async (req, res, next) => {
   try {
     const { id } = req.params;
     const project = await Project.findById(id);
+
     if (!project)
       return res
         .status(400)

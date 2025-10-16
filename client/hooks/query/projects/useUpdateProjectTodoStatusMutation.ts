@@ -11,13 +11,13 @@ interface updateTodoVariable {
   data: UpdateTodoProjectInput;
 }
 
-export const useUpdateProjectTodoMutation = () => {
+export const useUpdateProjectTodoStatusMutation = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, todoId, data }: updateTodoVariable) =>
-      projectsService.updateTodo(id, todoId, data),
+      projectsService.updateStatus(id, todoId, data),
     onSuccess: (response, variables) => {
       toast.success(response.message || "Todo Created Successfully");
 
@@ -39,4 +39,4 @@ export const useUpdateProjectTodoMutation = () => {
   });
 };
 
-export default useUpdateProjectTodoMutation;
+export default useUpdateProjectTodoStatusMutation;
