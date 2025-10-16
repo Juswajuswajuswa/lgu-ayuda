@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,7 @@ export default function CreateAdminPage() {
       router.push(`/verify-otp?board&email=${encodeURIComponent(email)}`);
       toast.success(data.message);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       console.error("Registration error:", error);
       toast.error(error.response?.data?.message || "Registration failed");
     },
