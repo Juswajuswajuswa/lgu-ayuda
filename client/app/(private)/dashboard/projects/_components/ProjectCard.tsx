@@ -77,7 +77,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex flex-col gap-2">
           <CardTitle>{project.projectName}</CardTitle>
           <CardDescription>{project.description}</CardDescription>
-          <CardDescription>Budget: ${project.budget}</CardDescription>
+          <CardDescription>Budget: PHP{project.budget}</CardDescription>
           <CardDescription>Status: {project.status}</CardDescription>
         </div>
         <div className="flex space-x-2">

@@ -74,7 +74,7 @@ export default function AddTodoPage() {
       <CardHeader>
         <div className="space-y-6">
           <Link
-            href={`/dashboard/projects}`} // Link back to the specific project page
+            href={`/dashboard/projects`} // Link back to the specific project page
             className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeftIcon className="h-4 w-4" />
