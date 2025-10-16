@@ -24,6 +24,7 @@ import axiosInstance from "@/lib/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { queryKeys } from "@/lib/query-client/keys";
 export default function CreateStaffPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,8 +49,8 @@ export default function CreateStaffPage() {
     },
     onSuccess: (data) => {
       toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       router.push("/dashboard/staff");
-      queryClient.invalidateQueries({ queryKey: ["staffs"] });
     },
     onError: (error: any) => {
       const serverError = error?.response?.data;
@@ -75,7 +76,7 @@ export default function CreateStaffPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log(formData)
+    console.log(formData);
 
     createStaff(formData);
   };

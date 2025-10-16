@@ -8,32 +8,33 @@ import {
   CardDescription,
   CardAction,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Loader2, PlusIcon } from "lucide-react";
-import { columns } from "./colums";
-import { DataTable } from "../staff/data-table";
 import Link from "next/link";
-import useBeneficiaries from "@/hooks/query/beneficiary/useBeneficiaries";
+import { columns } from "./columns";
+import { DataTable } from "../staff/data-table";
+import useApplications from "@/hooks/query/application/useApplications";
 
-export default function BeneficiariesPage() {
-  const { data: response, isPending, isError } = useBeneficiaries();
+export default function ApplicationsPage() {
+  const { data: response, isPending, isError } = useApplications();
 
-  const beneficiaries = response?.beneficiaries || [];
-
-  console.log(beneficiaries);
+  const applications = response?.data || [];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Beneficiaries</CardTitle>
-        <CardDescription>List of all beneficiaries.</CardDescription>
+        <CardTitle>Applications</CardTitle>
+        <CardDescription>
+          Review and manage beneficiary applications.
+        </CardDescription>
         <CardAction>
           <Link
-            href="/dashboard/beneficiaries/create"
+            href="/dashboard/applications/create"
             className={buttonVariants({ variant: "default" })}
           >
             <PlusIcon />
-            Add Beneficiary
+            Create Application
           </Link>
         </CardAction>
       </CardHeader>
@@ -45,14 +46,15 @@ export default function BeneficiariesPage() {
           </div>
         ) : isError ? (
           <div className="h-24 flex items-center justify-center text-destructive">
-            Error loading beneficiaries data.
+            Error loading applications data.
           </div>
-        ) : beneficiaries.length === 0 ? (
+        ) : applications.length === 0 ? (
           <div className="h-24 flex items-center justify-center text-muted-foreground">
-            No beneficiaries found. Add your first beneficiary to get started.
+            No applications found. Applications will appear here when
+            beneficiaries apply for ayuda.
           </div>
         ) : (
-          <DataTable columns={columns} data={beneficiaries} />
+          <DataTable columns={columns} data={applications} />
         )}
       </CardContent>
     </Card>

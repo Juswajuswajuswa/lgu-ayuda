@@ -17,9 +17,11 @@ export const getSingleUser = async (req, res, next) => {
 export const getUsers = async (req, res, next) => {
   try {
     const allUsers = await User.find({
-      role: {
-        $ne: "admin",
-      },
+      $or: [
+        { role: "encoder" },
+        { role: "validator" },
+        { role: "distributer" },
+      ],
     })
       .populate({ path: "barangay", select: "name municipality province" })
       .sort({ createdAt: -1 });

@@ -203,7 +203,9 @@ export const getSingleBeneficiary = async (req, res, next) => {
 
 export const getBeneficiaries = async (req, res, next) => {
   try {
-    const beneficiaries = await Beneficiary.find({ isArchived: true })
+    const beneficiaries = await Beneficiary.find({
+      $or: [{ isArchived: false }, { isArchived: { $exists: false } }],
+    })
       .populate({
         path: "address.barangay",
         select: "name municipality province",

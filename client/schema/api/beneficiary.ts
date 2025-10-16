@@ -17,6 +17,7 @@ export const beneficiarySchema = z.object({
   gender: z.enum(["male", "female", "other"]),
   phoneNumber: z.string().min(1, "Phone number is required"),
   validId: z.string(),
+  isApplied: z.boolean().optional(),
   address: z.object({
     municipality: z.string().min(1, "Municipality is required"),
     province: z.string().min(1, "Province is required"),
