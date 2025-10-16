@@ -34,6 +34,25 @@ export const projectsService = {
     todoId: string,
     data: UpdateTodoProjectInput
   ) => {
-    return apiClient.post(`/${id}/update-title/${todoId}`, data);
+    return apiClient.post(`/project/${id}/update-title/${todoId}`, data);
+  },
+
+  updateStatus: async (
+    id: string,
+    todoId: string,
+    data: CreateProjectTodoInput
+  ) => {
+    return apiClient.post(`/project/${id}/update-status/${todoId}`, data);
+  },
+
+  deleteTodo: async (
+    id: string,
+    todoId: string
+  ): Promise<MutateProjectsResponse> => {
+    return apiClient.delete(`/project/${id}/delete/${todoId}`);
+  },
+
+  deleteProject: async (id: string): Promise<MutateProjectsResponse> => {
+    return apiClient.delete(`/project/${id}/delete-project`);
   },
 };

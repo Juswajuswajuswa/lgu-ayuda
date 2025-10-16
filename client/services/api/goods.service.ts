@@ -50,6 +50,9 @@ export const goodsService = {
   delete: async (id: string): Promise<MutateGoodsResponse> => {
     return apiClient.delete(`/goods/delete-goods/${id}`);
   },
+
+
+
 };
 
 export default goodsService;
