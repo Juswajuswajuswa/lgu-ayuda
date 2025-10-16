@@ -5,6 +5,7 @@ import {
   deleteAllDistribution,
   distribute,
   getDistributions,
+  updateDistributionStatus,
 } from "../controllers/distribution.controller.js";
 
 const router = express.Router();
@@ -17,6 +18,13 @@ router.post(
 );
 
 router.get(`/distributions`, getDistributions);
+
+router.put(
+  `/update-status/:distributionId`,
+  requireAuth,
+  requireRole("distributer", "admin"),
+  updateDistributionStatus
+);
 
 router.delete(
   `/delete-distributions`,

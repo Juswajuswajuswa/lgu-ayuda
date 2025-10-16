@@ -74,7 +74,7 @@ const data = {
     },
     {
       title: "Distribution",
-      url: "/dashboard/distribution",
+      url: "/dashboard/distributions",
       icon: IconBox,
       role: ["admin", "distributer"],
     },

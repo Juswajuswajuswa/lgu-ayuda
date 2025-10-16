@@ -30,6 +30,8 @@ export const populatedBeneficiarySchema = z.object({
 export const populatedAyudaSchema = z.object({
   _id: mongoIdSchema,
   name: z.string(),
+  type: z.enum(["cash", "goods"]),
+  amount: z.number().optional(),
 });
 
 // Application

@@ -83,7 +83,7 @@ export const getApplications = async (req, res, next) => {
         },
         {
           path: "ayuda",
-          select: "name",
+          select: "name type amount",
         },
       ])
       .sort({ createdAt: -1 });
@@ -268,7 +268,7 @@ export const pendingApplications = async (req, res, next) => {
         },
         {
           path: "ayuda",
-          select: "name",
+          select: "name type amount",
         },
       ])
       .sort({ createdAt: -1 });
@@ -303,7 +303,7 @@ export const approvedApplications = async (req, res, next) => {
         },
         {
           path: "ayuda",
-          select: "name",
+          select: "name type amount",
         },
       ])
       .sort({ createdAt: -1 });
@@ -338,7 +338,7 @@ export const rejectedApplications = async (req, res, next) => {
         },
         {
           path: "ayuda",
-          select: "name",
+          select: "name type amount",
         },
       ])
       .sort({ createdAt: -1 });
