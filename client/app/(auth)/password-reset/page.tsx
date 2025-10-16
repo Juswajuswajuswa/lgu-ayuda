@@ -5,28 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePasswordReset } from "@/hooks/query/auth/usePasswordResetMutation";
-import axiosInstance from "@/lib/axios";
 import {
   PasswordResetRequest,
   passwordResetRequestSchema,
 } from "@/schema/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 export default function PasswordResetPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const decodedEmail = decodeURIComponent(email || "");
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<PasswordResetRequest>({
+  const { register, handleSubmit } = useForm<PasswordResetRequest>({
     resolver: zodResolver(passwordResetRequestSchema),
     defaultValues: {
       email: decodedEmail,

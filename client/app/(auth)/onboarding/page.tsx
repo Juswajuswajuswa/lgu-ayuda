@@ -17,7 +17,16 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
+interface OnboardingData {
+  firstName: string;
+  lastName: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
+  email: string;
+}
 export default function OnboardingPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
@@ -34,7 +43,7 @@ export default function OnboardingPage() {
   });
   const router = useRouter();
   const { mutate: registerAdmin } = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: OnboardingData) => {
       const res = await axiosInstance.post(
         `/auth/onboarding/${decodedEmail}`,
         data
@@ -45,8 +54,11 @@ export default function OnboardingPage() {
       toast.success(data.message);
       router.push("/login");
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Internal server error");
+    onError: (error: AxiosError) => {
+      toast.error(
+        (error.response?.data as { message?: string })?.message ||
+          "Internal server error"
+      );
     },
   });
 
